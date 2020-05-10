@@ -11,8 +11,11 @@
 
 /*** TWI Structure ***/
 // State(1bit) | Button(7bit)
-// State: 1 is pressed, 2 is released
+// State: 0 is pressed, 1 is released
 // Button: see the following
+
+#define PRESSED 0
+#define RELEASED 1
 
 /*** Buttons ***/
 // Group(3bit) | Button(4bit)
@@ -69,9 +72,10 @@ class ButtonSet : public Set<char> {
 };
 
 char ButtonSet::initializer() {
-  return 0;
+  return 0;//ボタンIDに0は存在しないので0はNULLの代わりになる
 }
 char ButtonSet::validator(char item){
+  //ボタンIDに0は存在しないので0なら無効な値
   return ((item & 0b01111111) != 0) ? 1 : 0;
 }
 char ButtonSet::comparator(char a,char b) {
@@ -97,15 +101,25 @@ void matrixInit() {
 }
 
 Queue<char> events = Queue<char>();
+ButtonSet pressing = ButtonSet(8);
 
 void requestEvent()
 {
-  Wire.write(temp);//if(events.count() != 0) Wire.write(events.pop());
+  if(events.count() != 0) Wire.write(events.pop());
   return;
 }
 
 void setKey(char state, char button) {
-  //events.push((state & 1) << 7 | button & 0b01111111);
+  state = (state != 0) ? PRESSED : RELEASED;
+  char event = (state & 1) << 7 | button & 0b01111111;
+  switch(state){
+    case PRESSED:
+      if(pressing.Add(button)) events.push(event);
+    break;
+    case RELEASED:
+      if(pressing.Remove(button)) events.push(event);
+    break;
+  }
 }
 
 void loop()
