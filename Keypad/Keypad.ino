@@ -1,4 +1,6 @@
 #include <Wire.h>
+#include "Queue.h"
+#include "Set.h"
 
 #define I2C_ADDR 0x09
 
@@ -56,6 +58,27 @@
 
 char temp = 0b10000000;
 
+class ButtonSet : public Set<char> {
+  private:
+    static char initializer();
+    static char validator(char item);
+    static char comparator(char a,char b);
+  public:
+    // using Set<char>::Set
+    ButtonSet(int size = 256) : Set(size,initializer,validator,comparator){}
+};
+
+char ButtonSet::initializer() {
+  return 0;
+}
+char ButtonSet::validator(char item){
+  return ((item & 0b01111111) != 0) ? 1 : 0;
+}
+char ButtonSet::comparator(char a,char b) {
+  if(a == NULL || b == NULL) return 0;
+  return (a == b) ? 1 : 0;
+}
+
 void setup()
 {
   sbi(DDRB, 1);
@@ -73,14 +96,16 @@ void matrixInit() {
   PORTD |=  (0b00111111); //sbi
 }
 
+Queue<char> events = Queue<char>();
+
 void requestEvent()
 {
-  Wire.write(temp);
+  Wire.write(temp);//if(events.count() != 0) Wire.write(events.pop());
   return;
 }
 
 void setKey(char state, char button) {
-  temp = (state & 1) << 7 | button & 0b01111111;
+  //events.push((state & 1) << 7 | button & 0b01111111);
 }
 
 void loop()
