@@ -9,6 +9,7 @@
 #include "BLEMidi.h"
 #include "Chord.h"
 #include "Scale.h"
+#include "Keypad.h"
 
 #define DEVICE_NAME "BLEChorder"
 
@@ -53,9 +54,9 @@ void _changeScene_raw() {
     case Scene::Connection:
       M5.Lcd.setCursor(0, 48);
       M5.Lcd.setTextSize(4);
-      M5.Lcd.println("BLEChorder");
+      M5.Lcd.println("CapsuleChord");
       M5.Lcd.setTextSize(2);
-      M5.Lcd.println("BLE MIDI Chordpad App\n");
+      M5.Lcd.println("BLE MIDI Chordpad Device\n");
       M5.Lcd.setTextSize(1);
       M5.Lcd.println("Advertising...");
       M5.Lcd.println("Press the button A to power off.");
@@ -142,7 +143,7 @@ void callBackCenterNoteNo(MenuItem* sender) {
 
 void setup() {
   M5.begin();
-  Wire.begin();
+  Keypad.begin();
   Serial.begin(9600);
 
   //SD Updater
@@ -199,6 +200,22 @@ void loop() {
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
       if(M5.BtnC.wasPressed())  playChord(V7);
       if(M5.BtnC.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
+      Keypad.update();
+      while(Keypad.hasEvent()){
+        char event = Keypad.getEvent();
+        Serial.printf("Event:0x%x\n",event);
+        switch(event >> 7 & 0b1) {
+          case Key_State_Pressed:
+            if((event & 0b1110000) == 0) {
+              uint8_t number = (event & 0b1111) - 1;
+              if(0 <= number && number <= 6) playChord(scale.getDiatonic(number,seventh));
+            }
+          break;
+          case Key_State_Released:
+            if((event & 0b1110000) == 0) sendNotes(false,std::vector<uint8_t>(),120);
+          break;
+        }
+      }
       buttonDrawer.draw();
     break;
     case Scene::Function:
