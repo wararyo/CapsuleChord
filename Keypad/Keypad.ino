@@ -120,10 +120,10 @@ void matrixInit() {
   PORTD &= ~(0b00000000); //cbi
   PORTD |=  (0b00111111); //sbi
 
-  DDRD &= ~(0b00110000); //cbi INPUT
-  DDRD |=  (0b00001111); //sbi OUTPUT
-  PORTD &= ~(0b00000000); //cbi
-  PORTD |=  (0b00111111); //sbi
+  DDRB &= ~(0b00110000); //cbi INPUT
+  DDRB |=  (0b00001111); //sbi OUTPUT
+  PORTB &= ~(0b00000000); //cbi
+  PORTB |=  (0b00111111); //sbi
 }
 
 Queue<char> events = Queue<char>(); //Data to be sent to the host
@@ -178,45 +178,45 @@ void loop()
   setKey(bit_is_clear(PIND,5),IIIm);
   delay(1);
 
-  /* Board2 */
-  // Row 1
-  PORTB &= ~(0b0001); //cbi
-  PORTB |=  (0b1110); //sbi
-  delay(1);
-  setKey(bit_is_clear(PINB,4),Ninth);
-  setKey(bit_is_clear(PINB,5),Thirteenth);
-  delay(1);
+  // /* Board2 */
+  // // Row 1
+  // PORTB &= ~(0b0001); //cbi
+  // PORTB |=  (0b1110); //sbi
+  // delay(1);
+  // setKey(bit_is_clear(PINB,4),Ninth);
+  // setKey(bit_is_clear(PINB,5),Thirteenth);
+  // delay(1);
 
-  // Row 2
-  PORTB &= ~(0b0010); //cbi
-  PORTB |=  (0b1101); //sbi
-  delay(1);
-  setKey(bit_is_clear(PINB,4),SeventhInvert);
-  setKey(bit_is_clear(PINB,5),Seventh);
-  delay(1);
+  // // Row 2
+  // PORTB &= ~(0b0010); //cbi
+  // PORTB |=  (0b1101); //sbi
+  // delay(1);
+  // setKey(bit_is_clear(PINB,4),SeventhInvert);
+  // setKey(bit_is_clear(PINB,5),Seventh);
+  // delay(1);
 
-  // Row 3
-  PORTB &= ~(0b0100); //cbi
-  PORTB |=  (0b1011); //sbi
-  delay(1);
-  setKey(bit_is_clear(PINB,4),Augment);
-  setKey(bit_is_clear(PINB,5),Sus4);
-  delay(1);
+  // // Row 3
+  // PORTB &= ~(0b0100); //cbi
+  // PORTB |=  (0b1011); //sbi
+  // delay(1);
+  // setKey(bit_is_clear(PINB,4),Augment);
+  // setKey(bit_is_clear(PINB,5),Sus4);
+  // delay(1);
 
-  // Row 4
-  PORTB &= ~(0b1000); //cbi
-  PORTB |=  (0b0111); //sbi
-  delay(1);
-  setKey(bit_is_clear(PINB,4),FlatFive);
-  setKey(bit_is_clear(PINB,5),ThirdInvert);
-  delay(1);
+  // // Row 4
+  // PORTB &= ~(0b1000); //cbi
+  // PORTB |=  (0b0111); //sbi
+  // delay(1);
+  // setKey(bit_is_clear(PINB,4),FlatFive);
+  // setKey(bit_is_clear(PINB,5),ThirdInvert);
+  // delay(1);
 
-  /* Other */
-  setKey(bit_is_set(PIND,6),PitchUp);
-  setKey(bit_is_set(PIND,7),PitchDown);
-  setKey(bit_is_set(PINB,6),InversionUp);
-  setKey(bit_is_set(PINB,7),InversionDown);
-  setKey(bit_is_set(PINC,0),Gyro);
-  setKey(bit_is_set(PINC,1),Sustain);
-  delay(1);
+  // /* Other */
+  // setKey(bit_is_set(PIND,6),PitchUp);
+  // setKey(bit_is_set(PIND,7),PitchDown);
+  // setKey(bit_is_set(PINB,6),InversionUp);
+  // setKey(bit_is_set(PINB,7),InversionDown);
+  // setKey(bit_is_set(PINC,0),Gyro);
+  // setKey(bit_is_set(PINC,1),Sustain);
+  // delay(1);
 }
