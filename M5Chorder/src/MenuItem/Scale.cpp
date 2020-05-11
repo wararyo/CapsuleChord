@@ -1,4 +1,4 @@
-#include "MenuItemScale.h"
+#include "MenuItem/Scale.h"
 #include "Scale.h"
 
 String MenuItemScale::getStringOfItem(int value) {

@@ -6,7 +6,7 @@ MenuItemScale is based on MenuItemNumeric.
 https://github.com/lovyan03/M5Stack_TreeView/blob/master/src/MenuItemNumeric.h
 */
 
-#include <MenuItemSpinner.h>
+#include <MenuItem/Spinner.h>
 #include <Scale.h>
 
 class MenuItemScale : public MenuItemSpinner {

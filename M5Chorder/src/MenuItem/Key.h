@@ -6,7 +6,7 @@ https://github.com/lovyan03/M5Stack_TreeView/blob/master/src/MenuItemNumeric.h
 #ifndef _MENUITEMKEY_H_
 #define _MENUITEMKEY_H_
 
-#include "MenuItemSpinner.h"
+#include "Spinner.h"
 #include "Chord.h"
 
 class MenuItemKey : public MenuItemSpinner {
