@@ -1,1 +1,13 @@
 ﻿Keypad/.vscode
+M5Chorder/.vscode
+
+/M5Chorder/*.pio
+/M5Chorder/*.pioenvs
+/M5Chorder/*.piolibdeps
+/M5Chorder/.vscode/.browse.c_cpp.db*
+/M5Chorder/.vscode/c_cpp_properties.json
+/M5Chorder/.vscode/launch.json
+/M5Chorder/.vscode/ipch/
+
+*.code-workspace
+*.ipch
