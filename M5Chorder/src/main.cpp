@@ -1,16 +1,12 @@
 #include <M5Stack.h>
-#include <M5TreeView.h>
 #include <vector>
-#include <MenuItemToggle.h>
-#include <MenuItemNumeric.h>
 #include <Preferences.h>
 #include "M5StackUpdater.h"
-#include "MenuItemKey.h"
-#include "MenuItemScale.h"
 #include "BLEMidi.h"
 #include "Chord.h"
 #include "Scale.h"
 #include "Keypad.h"
+#include "Menu.h"
 
 #define DEVICE_NAME "BLEChorder"
 
@@ -19,15 +15,15 @@ Scale scale = Scale(0);
 bool seventh = true;
 uint8_t centerNoteNo = 64;
 
-M5TreeView tv;
-typedef std::vector<MenuItem*> vmi;
 M5ButtonDrawer buttonDrawer;
+
+Settings settings;
 
 //画面
 enum Scene : uint8_t {
   Connection,
   Play,
-  Menu,
+  FunctionMenu,
   length
 };
 
@@ -66,8 +62,8 @@ void _changeScene_raw() {
       buttonDrawer.setText(String("Fn"),String("I"),String("Menu"));//TODO:Change it to "Fn, ,Menu"
       buttonDrawer.draw(true);
     break;
-    case Scene::Menu:
-      tv.begin();
+    case Scene::FunctionMenu:
+      Menu.begin(&settings);
     break;
   }
   currentScene = requiredToChangeScene;
@@ -110,33 +106,9 @@ class ServerCallbacks: public BLEMidiServerCallbacks {
     }
 };
 
-void callBackKey(MenuItem* sender) {
-  MenuItemKey* mi((MenuItemKey*)sender);
-  scale.key = mi->value;
-}
-
-void callBackScale(MenuItem* sender) {
-  MenuItemKey* mi((MenuItemKey*)sender);
-  scale.currentScale = Scale::getAvailableScales()[mi->value].get();
-}
-
-void callBackSeventh(MenuItem* sender) {
-  MenuItemToggle* mi((MenuItemToggle*)sender);
-  seventh = mi->value;
-}
-
-void callBackCenterNoteNo(MenuItem* sender) {
-  MenuItemNumeric* mi((MenuItemNumeric*)sender);
-  centerNoteNo = mi->value;
-}
-
 void setup() {
   M5.begin();
-  Keypad.begin();
   Serial.begin(9600);
-  // Decline speaker noise
-  M5.Speaker.begin();
-  M5.Speaker.mute();
 
   //SD Updater
   if(digitalRead(BUTTON_A_PIN) == 0) {
@@ -145,26 +117,18 @@ void setup() {
     ESP.restart();
   }
 
+  Keypad.begin();
+  // Decline speaker noise
+  M5.Speaker.begin();
+  M5.Speaker.mute();
+
   changeScene(Scene::Connection);
   _changeScene_raw();
 
   Midi.begin(DEVICE_NAME, new ServerCallbacks(), NULL);
 
-  //MenuMenu
+  //Menu
   M5ButtonDrawer::width = 106;
-  tv.clientRect.x = 60;
-  tv.clientRect.y = 16;
-  tv.clientRect.w = 240;
-  tv.clientRect.h = 200;
-  tv.itemWidth = 192;
-  tv.itemHeight = 24;
-  tv.setTextFont(2);
-  tv.setItems(vmi{
-    new MenuItemKey("Key", scale.key, callBackKey),
-    new MenuItemScale("Scale", 0, callBackScale),
-    new MenuItemToggle("Seventh",seventh,callBackSeventh),
-    new MenuItemNumeric("CenterNoteNo",24,81,centerNoteNo,callBackCenterNoteNo)
-  });  
 }
 
 void loop() {
@@ -177,11 +141,13 @@ void loop() {
       M5.update();
       if(M5.BtnC.pressedFor(100)) { //Go to Menu Scene
         sendNotes(false,std::vector<uint8_t>(),120);
-        changeScene(Scene::Menu);
+        changeScene(Scene::FunctionMenu);
         break;
       }
-      if(M5.BtnA.wasPressed())  playChord(scale.getDiatonic(2,seventh)); //For testing TODO:delete it
+      
+      if(M5.BtnA.wasPressed())  playChord(scale.getDiatonic(0,seventh)); //For testing TODO:delete it
       if(M5.BtnA.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
+
       Keypad.update();
       while(Keypad.hasEvent()){
         char event = Keypad.getEvent();
@@ -199,10 +165,10 @@ void loop() {
       }
       buttonDrawer.draw();
     break;
-    case Scene::Menu:
-      tv.update();//Contains M5.update(); (probably...)
-      // Press A at root to back to play scene
-      if(M5.BtnA.wasPressed() && (M5TreeView::getFocusItem()->parentItem() == &tv)) changeScene(Scene::Play);
+    case Scene::FunctionMenu:
+      Menu.update();
+      // When requried, back to play scene
+      if(Menu.isExitRequired()) changeScene(Scene::Play);
     break;
   }
   if(currentScene != requiredToChangeScene) _changeScene_raw();

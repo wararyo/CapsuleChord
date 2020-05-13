@@ -1,4 +1,4 @@
-﻿Keypad/.vscode
+Keypad/.vscode
 M5Chorder/.vscode
 
 /M5Chorder/*.pio
@@ -11,3 +11,4 @@ M5Chorder/.vscode
 
 *.code-workspace
 *.ipch
+.DS_Store
