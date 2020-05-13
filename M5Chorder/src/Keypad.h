@@ -30,7 +30,7 @@
 #define Key_Custom2 9
 // Modifiers (Group 2)
 #define Key_ThirdInvert   0x10 | 1
-#define Key_FlatFive      0x10 | 2
+#define Key_FifthFlat     0x10 | 2
 #define Key_Augment       0x10 | 3
 #define Key_Sus4          0x10 | 4
 #define Key_Seventh       0x10 | 5
