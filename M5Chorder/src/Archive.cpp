@@ -4,7 +4,7 @@
 void serialize(OutputArchive &archive,const char *key,const char *string){
     archive.getDocument()[key] = string;
 }
-void deserialize(OutputArchive &archive,const char *key,const char *string){
+void deserialize(InputArchive &archive,const char *key,const char *string){
 }
 
 //int
@@ -13,5 +13,5 @@ void serialize(OutputArchive &archive,const char *key,int number){
     itoa(number,str,10);
     archive.getDocument()[key] = std::move(str);
 }
-void deserialize(OutputArchive &archive,const char *key,int number){
+void deserialize(InputArchive &archive,const char *key,int number){
 }

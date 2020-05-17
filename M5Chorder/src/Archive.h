@@ -15,24 +15,25 @@ const int maxJsonFileSize = 2048;
 /* Meta functions */
 
 class OutputArchive;
+class InputArchive;
 
 struct is_serializable_internally_impl {
     template <class T>
-    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(x.serialize(doc,name),x.deserialize(doc,name),std::true_type{});
+    static auto check(OutputArchive oa,InputArchive ia, const char * name,T&& x)->decltype(x.serialize(oa,name),x.deserialize(ia,name),std::true_type{});
     template <class T>
     static auto check(...)->std::false_type;
 };
 struct is_serializable_externally_impl {
     template <class T>
-    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(serialize(doc,name,x),deserialize(doc,name,x),std::true_type{});
+    static auto check(OutputArchive oa,InputArchive ia, const char * name,T&& x)->decltype(serialize(oa,name,x),deserialize(ia,name,x),std::true_type{});
     template <class T>
     static auto check(...)->std::false_type;
 };
 struct is_serializable_impl {
     template <class T>
-    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(x.serialize(doc,name),x.deserialize(doc,name),std::true_type{});
+    static auto check(OutputArchive oa,InputArchive ia, const char * name,T&& x)->decltype(x.serialize(oa,name),x.deserialize(ia,name),std::true_type{});
     template <class T>
-    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(serialize(doc,name,x),deserialize(doc,name,x),std::true_type{});
+    static auto check(OutputArchive oa,InputArchive ia, const char * name,T&& x)->decltype(serialize(oa,name,x),deserialize(ia,name,x),std::true_type{});
     template <class T>
     static auto check(...)->std::false_type;
 };
@@ -40,14 +41,14 @@ struct is_serializable_impl {
 // Serializable internally or externally
 template <class T>
 class is_serializable :
-    public decltype(is_serializable_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
+    public decltype(is_serializable_impl::check<T>(std::declval<OutputArchive>(), std::declval<InputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 
 template <class T>
 class is_serializable_internally :
-    public decltype(is_serializable_internally_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
+    public decltype(is_serializable_internally_impl::check<T>(std::declval<OutputArchive>(), std::declval<InputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 template <class T>
 class is_serializable_externally :
-    public decltype(is_serializable_externally_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
+    public decltype(is_serializable_externally_impl::check<T>(std::declval<OutputArchive>(), std::declval<InputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 
 
 /* Archive class */
@@ -84,16 +85,46 @@ public:
     }
 };
 
+class InputArchive {
+private:
+    std::vector<JsonObject> nestStack;
+    DynamicJsonDocument doc = DynamicJsonDocument(maxJsonCapacity);
+public:
+    InputArchive() {
+        nestStack.push_back(doc.to<JsonObject>());
+    }
+    template <class T, typename std::enable_if<is_serializable_internally<T>::value, std::nullptr_t>::type = nullptr>
+    inline void operator()(const char *key,T && arg) {
+        arg.deserialize(*this,key);
+    }
+    template <class T, typename std::enable_if<is_serializable_externally<T>::value, std::nullptr_t>::type = nullptr>
+    inline void operator()(const char *key,T && arg) {
+        deserialize(*this,key,std::forward<T>(arg));
+    }
+    void pushNest(const char *key) {
+        nestStack.push_back(nestStack[nestStack.size()-1].createNestedObject(key));
+    }
+    void popNest() {
+        nestStack.pop_back();
+    }
+    JsonObject getDocument(){
+        return nestStack[nestStack.size()-1];
+    }
+    void fromJSON(const char *in){
+        deserializeJson(doc,in);
+    }
+};
+
 
 /* Serialization of Types */
 
 //const char *
 void serialize(OutputArchive &archive,const char *key,const char *string);
-void deserialize(OutputArchive &archive,const char *key,const char *string);
+void deserialize(InputArchive &archive,const char *key,const char *string);
 
 //int
 void serialize(OutputArchive &archive,const char *key,int number);
-void deserialize(OutputArchive &archive,const char *key,int number);
+void deserialize(InputArchive &archive,const char *key,int number);
 
 //std::vector
 template <class T, class A>
@@ -105,7 +136,7 @@ typename std::enable_if<is_serializable<T>::value, void>::type serialize(OutputA
     archive.popNest();
 }
 template <class T, class A>
-typename std::enable_if<is_serializable<T>::value, void>::type deserialize(OutputArchive &archive,const char *key,std::vector<T, A> list){
+typename std::enable_if<is_serializable<T>::value, void>::type deserialize(InputArchive &archive,const char *key,std::vector<T, A> list){
 
 }
 
@@ -115,7 +146,7 @@ typename std::enable_if<is_serializable<T>::value, void>::type serialize(OutputA
     archive(key,*ptr);
 }
 template <class T>
-typename std::enable_if<is_serializable<T>::value, void>::type deserialize(OutputArchive &archive,const char *key,T* ptr){
+typename std::enable_if<is_serializable<T>::value, void>::type deserialize(InputArchive &archive,const char *key,T* ptr){
 
 }
 

@@ -25,7 +25,7 @@ public:
             archive(name,children);
         }
     }
-    virtual void deserialize(OutputArchive &archive,const char *key) {
+    virtual void deserialize(InputArchive &archive,const char *key) {
         if(children.empty()) {
             //Deserialize nothing
         } else {
@@ -62,7 +62,7 @@ public:
     void serialize(OutputArchive &archive,const char *key) override {
         archive(name,content);
     }
-    void deserialize(OutputArchive &archive,const char *key) override {
+    void deserialize(InputArchive &archive,const char *key) override {
         archive(name,content);
     }
 };
