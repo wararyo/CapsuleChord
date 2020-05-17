@@ -14,11 +14,3 @@ void serialize(OutputArchive &archive,const char *key,int number){
 }
 void deserialize(OutputArchive &archive,const char *key,int number){
 }
-
-// template <class T, typename std::enable_if<is_serializable<T>::value, std::nullptr_t>::type = nullptr>
-// void serialize(OutputArchive &archive,const char *key,std::vector<T, std::allocator<T>> list){
-// }
-// template <class T, typename std::enable_if<is_serializable<T>::value, std::nullptr_t>::type = nullptr>
-// void deserialize(OutputArchive &archive,const char *key,std::vector<T, std::allocator<T>> list){
-
-// }

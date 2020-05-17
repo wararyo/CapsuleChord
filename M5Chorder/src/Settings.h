@@ -19,31 +19,36 @@ class OutputArchive;
 
 struct is_serializable_internally_impl {
     template <class T>
-    static auto check(const char * name,T&& x,OutputArchive doc)->decltype(x.serialize(doc,name),x.deserialize(doc,name),std::true_type{});
+    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(x.serialize(doc,name),x.deserialize(doc,name),std::true_type{});
     template <class T>
     static auto check(...)->std::false_type;
 };
 struct is_serializable_externally_impl {
     template <class T>
-    static auto check(const char * name,T&& x, OutputArchive doc)->decltype(serialize(doc,name,x),deserialize(doc,name,x),std::true_type{});
+    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(serialize(doc,name,x),deserialize(doc,name,x),std::true_type{});
+    template <class T>
+    static auto check(...)->std::false_type;
+};
+struct is_serializable_impl {
+    template <class T>
+    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(x.serialize(doc,name),x.deserialize(doc,name),std::true_type{});
+    template <class T>
+    static auto check(OutputArchive doc, const char * name,T&& x)->decltype(serialize(doc,name,x),deserialize(doc,name,x),std::true_type{});
     template <class T>
     static auto check(...)->std::false_type;
 };
 
-// Serializable internally or externally (disjuction cant be used)
+// Serializable internally or externally
 template <class T>
 class is_serializable :
-    public decltype(
-        is_serializable_internally_impl::check<T>(std::declval<const char *>(),std::declval<T>(),std::declval<OutputArchive>()) ? 
-        std::true_type{} :
-        is_serializable_externally_impl::check<T>(std::declval<const char *>(),std::declval<T>(),std::declval<OutputArchive>())
-        ) {};
+    public decltype(is_serializable_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
+
 template <class T>
 class is_serializable_internally :
-    public decltype(is_serializable_internally_impl::check<T>(std::declval<const char *>(),std::declval<T>(),std::declval<OutputArchive>())){};
+    public decltype(is_serializable_internally_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 template <class T>
 class is_serializable_externally :
-    public decltype(is_serializable_externally_impl::check<T>(std::declval<const char *>(),std::declval<T>(),std::declval<OutputArchive>())){};
+    public decltype(is_serializable_externally_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 
 void serialize(OutputArchive &archive,const char *key,const char *string);
 void deserialize(OutputArchive &archive,const char *key,const char *string);
@@ -59,6 +64,14 @@ typename std::enable_if<is_serializable<T>::value, void>::type serialize(OutputA
 }
 template <class T, class A>
 typename std::enable_if<is_serializable<T>::value, void>::type deserialize(OutputArchive &archive,const char *key,std::vector<T, A> list){
+
+}
+template <class T>
+typename std::enable_if<is_serializable<T>::value, void>::type serialize(OutputArchive &archive,const char *key,T* ptr){
+    archive(key,*ptr);
+}
+template <class T>
+typename std::enable_if<is_serializable<T>::value, void>::type deserialize(OutputArchive &archive,const char *key,T* ptr){
 
 }
 
@@ -86,21 +99,22 @@ public:
 class SettingItem {
 public:
     const char *name;
-    std::vector<int> children;
-    SettingItem(const char *name,std::vector<int> children){
+    std::vector<SettingItem*> children;
+    SettingItem(){}
+    SettingItem(const char *name,std::vector<SettingItem*> children){
         this->name = name;
         this->children = children;
     }
-    void serialize(OutputArchive &archive,const char *key) {
+    virtual void serialize(OutputArchive &archive,const char *key) {
         if(children.empty()) {
             Serial.printf("SettingItem#serialize(%s,content)",name);
-            // archive(name,getContent());
+            archive(name,"Empty Content");
         } else {
             Serial.printf("SettingItem#serialize(%s,children)",name);
             archive(name,children);
         }
     }
-    void deserialize(OutputArchive &archive,const char *key) {
+    virtual void deserialize(OutputArchive &archive,const char *key) {
         if(children.empty()) {
             // archive(name,getContent());
         } else {
@@ -109,16 +123,32 @@ public:
     }
 };
 
+class SettingItemString : public SettingItem {
+public:
+    const char *content;
+    SettingItemString(const char *name,const char *content){
+        this->name = name;
+        this->content = content;
+    }
+    void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,content);
+    }
+    void deserialize(OutputArchive &archive,const char *key) override {
+        archive(name,content);
+    }
+};
+
 class Settings : public SettingItem {
 public:
-    Settings(std::vector<int> items) : SettingItem("Settings",items){}
+    Settings(std::vector<SettingItem*> items) : SettingItem("Settings",items){}
     void load(String path){
     }
     void save(String path = jsonFilePath){
         OutputArchive archive = OutputArchive();
-        std::vector<int> vec = std::vector<int>{1,2,3,4};
-        archive("test","tanosiine");
-        archive(name,vec);
+        std::vector<bool> vec = std::vector<bool>{true,true,false,true};
+        // static_assert(is_serializable<decltype(this->children[0])>::value,"SettingItem is not serializable");
+        // archive("test","tanosiine");
+        // archive(name,vec);
         archive(name,*this);
         char output[maxJsonFileSize];
         archive.toJSON(output);
