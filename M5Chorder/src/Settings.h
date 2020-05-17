@@ -22,14 +22,13 @@ public:
         if(children.empty()) {
             archive(name,"Empty Content");
         } else {
-            archive(name,children);
+            archive(name,std::forward<decltype(children)>(children));
         }
     }
     virtual void deserialize(InputArchive &archive,const char *key) {
-        if(children.empty()) {
-            //Deserialize nothing
-        } else {
-            archive(name,children);
+        if(archive.getDocument().containsKey(key))
+        {
+            archive(name,std::forward<decltype(children)>(children));
         }
     }
 };
@@ -37,7 +36,17 @@ public:
 class Settings : public SettingItem {
 public:
     Settings(std::vector<SettingItem*> items) : SettingItem("Settings",items){}
-    void load(String path){
+    void load(String path = jsonFilePath){
+        char output[maxJsonFileSize] = {'\0'};
+        File file = SD.open(path);
+        if(file){
+            file.read((uint8_t *)output,maxJsonFileSize);
+            file.close();
+        }
+        Serial.println(output);
+        InputArchive archive = InputArchive();
+        archive.fromJSON(output);
+        archive(name,*this);
     }
     void save(String path = jsonFilePath){
         OutputArchive archive = OutputArchive();
@@ -63,7 +72,7 @@ public:
         archive(name,content);
     }
     void deserialize(InputArchive &archive,const char *key) override {
-        archive(name,content);
+        archive(name,std::forward<const char *>(content));
     }
 };
 

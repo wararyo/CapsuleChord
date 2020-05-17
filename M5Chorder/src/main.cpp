@@ -133,9 +133,6 @@ void setup() {
 
   //Menu
   M5ButtonDrawer::width = 106;
-
-  //Test
-  settings.save();
 }
 
 void loop() {
