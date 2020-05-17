@@ -45,9 +45,10 @@ public:
         char output[maxJsonFileSize];
         archive.toJSON(output);
         Serial.println(output);
-        // File file = SD.open(path,FILE_WRITE);
-        // file.print(output);
-        // file.close();
+        File file = SD.open(path,FILE_WRITE);
+        if(!file) Serial.println("Something wrong happened with saving settings.");
+        file.print(output);
+        file.close();
     }
 };
 

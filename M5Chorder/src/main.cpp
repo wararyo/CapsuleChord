@@ -19,7 +19,8 @@ M5ButtonDrawer buttonDrawer;
 
 typedef std::vector<SettingItem*> si;
 Settings settings(si{
-  new SettingItemString("test item","test content from main.cpp")
+  new SettingItemString("test item","test content from main.cpp"),
+  new SettingItemString("test item2","test content2 from main.cpp")
 });
 
 //画面

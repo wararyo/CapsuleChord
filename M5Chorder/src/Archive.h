@@ -12,6 +12,8 @@
 const int maxJsonCapacity = JSON_OBJECT_SIZE(64);
 const int maxJsonFileSize = 2048;
 
+/* Meta functions */
+
 class OutputArchive;
 
 struct is_serializable_internally_impl {
@@ -47,11 +49,16 @@ template <class T>
 class is_serializable_externally :
     public decltype(is_serializable_externally_impl::check<T>(std::declval<OutputArchive>(), std::declval<const char *>(), std::declval<T>())){};
 
+
+/* Archive class */
+
 class OutputArchive {
 private:
-public:
+    std::vector<JsonObject> nestStack;
     DynamicJsonDocument doc = DynamicJsonDocument(maxJsonCapacity);
+public:
     OutputArchive() {
+        nestStack.push_back(doc.to<JsonObject>());
     }
     template <class T, typename std::enable_if<is_serializable_internally<T>::value, std::nullptr_t>::type = nullptr>
     inline void operator()(const char *key,T && arg) {
@@ -61,12 +68,22 @@ public:
     inline void operator()(const char *key,T && arg) {
         serialize(*this,key,std::forward<T>(arg));
     }
+    void pushNest(const char *key) {
+        nestStack.push_back(nestStack[nestStack.size()-1].createNestedObject(key));
+    }
+    void popNest() {
+        nestStack.pop_back();
+    }
+    JsonObject getDocument(){
+        return nestStack[nestStack.size()-1];
+    }
     void toJSON(char *out){
         char output[maxJsonFileSize];
         serializeJson(doc,output);
         out = std::move(output);
     }
 };
+
 
 /* Serialization of Types */
 
@@ -81,9 +98,11 @@ void deserialize(OutputArchive &archive,const char *key,int number);
 //std::vector
 template <class T, class A>
 typename std::enable_if<is_serializable<T>::value, void>::type serialize(OutputArchive &archive,const char *key,std::vector<T, A> list){
+    archive.pushNest(key);
     for(int i = 0;i < list.size();i++) {
         archive(AUTO_NVP(list[i]));
     }
+    archive.popNest();
 }
 template <class T, class A>
 typename std::enable_if<is_serializable<T>::value, void>::type deserialize(OutputArchive &archive,const char *key,std::vector<T, A> list){
