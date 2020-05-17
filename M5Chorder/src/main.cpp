@@ -17,7 +17,10 @@ uint8_t centerNoteNo = 64;
 
 M5ButtonDrawer buttonDrawer;
 
-Settings settings;
+typedef std::vector<SettingItem*> si;
+Settings settings(si{
+  new SettingItemString("test item","test content from main.cpp")
+});
 
 //画面
 enum Scene : uint8_t {
@@ -63,7 +66,7 @@ void _changeScene_raw() {
       buttonDrawer.draw(true);
     break;
     case Scene::FunctionMenu:
-      Menu.begin(&settings);
+      // Menu.begin(&settings);
     break;
   }
   currentScene = requiredToChangeScene;
@@ -129,6 +132,9 @@ void setup() {
 
   //Menu
   M5ButtonDrawer::width = 106;
+
+  //Test
+  settings.save();
 }
 
 void loop() {
