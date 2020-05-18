@@ -127,9 +127,21 @@ public:
 void serialize(OutputArchive &archive,const char *key,const char *string);
 void deserialize(InputArchive &archive,const char *key,const char * && string);
 
+//String
+void serialize(OutputArchive &archive,const char *key,String string);
+void deserialize(InputArchive &archive,const char *key,String && string);
+
 //int
 void serialize(OutputArchive &archive,const char *key,int number);
 void deserialize(InputArchive &archive,const char *key,int && number);
+
+//float
+void serialize(OutputArchive &archive,const char *key,float number);
+void deserialize(InputArchive &archive,const char *key,float && number);
+
+//bool
+void serialize(OutputArchive &archive,const char *key,bool value);
+void deserialize(InputArchive &archive,const char *key,bool && value);
 
 //std::vector
 template <class T, class A>
