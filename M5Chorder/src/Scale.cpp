@@ -90,7 +90,6 @@ const uint16_t MinorScale::diatonicSeventhOptions[] = {
     Chord::Seventh};
 
 
-
 Chord MinorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
     base.root = key + pitch[degree];
     base.root += offset;

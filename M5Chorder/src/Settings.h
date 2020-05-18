@@ -6,6 +6,8 @@
 #include <vector>
 #include <stdio.h>
 #include "Archive.h"
+#include "Chord.h"
+#include "Scale.h"
 
 const String jsonFilePath = "/capsulechord/settings.json";
 
@@ -36,28 +38,34 @@ public:
 class Settings : public SettingItem {
 public:
     Settings(std::vector<SettingItem*> items) : SettingItem("Settings",items){}
-    void load(String path = jsonFilePath){
+    bool load(String path = jsonFilePath){
+        //Read file
         char output[maxJsonFileSize] = {'\0'};
         File file = SD.open(path);
-        if(file){
-            file.read((uint8_t *)output,maxJsonFileSize);
-            file.close();
-        }
-        Serial.println(output);
+        if(!file) return false;
+        file.read((uint8_t *)output,maxJsonFileSize);
+        file.close();
+        //Deserialize
         InputArchive archive = InputArchive();
         archive.fromJSON(output);
         archive(name,*this);
+        return true;
     }
-    void save(String path = jsonFilePath){
+    bool save(String path = jsonFilePath){
+        //Serialize
         OutputArchive archive = OutputArchive();
         archive(name,*this);
         char output[maxJsonFileSize];
         archive.toJSON(output);
-        Serial.println(output);
+        //Write to file
         File file = SD.open(path,FILE_WRITE);
-        if(!file) Serial.println("Something wrong happened with saving settings.");
+        if(!file) {
+            Serial.println("Something wrong happened with saving settings.");
+            return false;
+        }
         file.print(output);
         file.close();
+        return true;
     }
 };
 
@@ -73,6 +81,51 @@ public:
     }
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<const char *>(content));
+    }
+};
+
+// class SettingItemChord : public SettingItem {
+// public:
+//     Chord content;
+//     SettingItemChord(const char *name,Chord content){
+//         this->name = name;
+//         this->content = content;
+//     }
+//     void serialize(OutputArchive &archive,const char *key) override {
+//         archive(name,content);
+//     }
+//     void deserialize(InputArchive &archive,const char *key) override {
+//         archive(name,std::forward<Chord>(content));
+//     }
+// };
+
+class SettingItemScale : public SettingItem {
+public:
+    Scale content;
+    SettingItemScale(const char *name,Scale content){
+        this->name = name;
+        this->content = content;
+    }
+    void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,content);
+    }
+    void deserialize(InputArchive &archive,const char *key) override {
+        archive(name,std::forward<Scale>(content));
+    }
+};
+
+class SettingItemBoolean : public SettingItem {
+public:
+    bool content;
+    SettingItemBoolean(const char *name,bool content){
+        this->name = name;
+        this->content = content;
+    }
+    void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,content);
+    }
+    void deserialize(InputArchive &archive,const char *key) override {
+        archive(name,std::forward<bool>(content));
     }
 };
 

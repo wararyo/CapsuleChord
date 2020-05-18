@@ -19,8 +19,7 @@ M5ButtonDrawer buttonDrawer;
 
 typedef std::vector<SettingItem*> si;
 Settings settings(si{
-  new SettingItemString("test item","test content from main.cpp"),
-  new SettingItemString("test item2","test content2 from main.cpp")
+  new SettingItemScale("Scale",Scale(0))
 });
 
 //画面
@@ -125,6 +124,17 @@ void setup() {
   // Decline speaker noise
   M5.Speaker.begin();
   M5.Speaker.mute();
+
+  // Load settings
+  if(!settings.load()){
+    Serial.println("settings.json is not found in SD, so I'll try to create it.");
+    if(!settings.save()) Serial.println("Setting file creation failed.");
+  }
+
+  // Test
+  auto scale = ((SettingItemScale*)settings.children[0])->content;
+  Serial.printf("key = %d,scale = %s",scale.key,scale.currentScale->name());
+  // End test
 
   changeScene(Scene::Connection);
   _changeScene_raw();
