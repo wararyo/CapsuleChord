@@ -6,6 +6,7 @@
 #include <map>
 #include <WString.h>
 #include <functional>
+#include "Archive.h"
 
 class Chord {
 public:
@@ -55,6 +56,19 @@ public:
     
     std::vector<uint8_t> toMidiNoteNumbers(uint8_t centerNoteNo, uint8_t region);
     String toString();
+
+    void serialize(OutputArchive &archive,const char *key) {
+        archive.pushNest(key);
+        archive(AUTO_NVP(root));
+        archive(AUTO_NVP(option));
+        archive.popNest();
+    }
+    void deserialize(InputArchive &archive,const char *key) {
+        archive.pushNest(key);
+        archive(AUTO_NVP(root));
+        archive(AUTO_NVP(option));
+        archive.popNest();
+    }
 
 protected:
     uint8_t maxNoteNo;

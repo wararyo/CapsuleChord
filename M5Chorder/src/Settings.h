@@ -84,20 +84,20 @@ public:
     }
 };
 
-// class SettingItemChord : public SettingItem {
-// public:
-//     Chord content;
-//     SettingItemChord(const char *name,Chord content){
-//         this->name = name;
-//         this->content = content;
-//     }
-//     void serialize(OutputArchive &archive,const char *key) override {
-//         archive(name,content);
-//     }
-//     void deserialize(InputArchive &archive,const char *key) override {
-//         archive(name,std::forward<Chord>(content));
-//     }
-// };
+class SettingItemChord : public SettingItem {
+public:
+    Chord content;
+    SettingItemChord(const char *name,Chord content){
+        this->name = name;
+        this->content = content;
+    }
+    void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,content);
+    }
+    void deserialize(InputArchive &archive,const char *key) override {
+        archive(name,std::forward<Chord>(content));
+    }
+};
 
 class SettingItemScale : public SettingItem {
 public:
