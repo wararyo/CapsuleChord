@@ -23,9 +23,23 @@ void serialize(OutputArchive &archive,const char *key,int number){
     archive.getDocument()[key] = number;
 }
 void deserialize(InputArchive &archive,const char *key,int && number){
-    if(archive.getDocument().containsKey(key)) {
-        number = archive.getDocument()[key];
-    }
+    if(archive.getDocument().containsKey(key)) number = archive.getDocument()[key];
+}
+
+//char
+void serialize(OutputArchive &archive,const char *key,char number){
+    archive.getDocument()[key] = number;
+}
+void deserialize(InputArchive &archive,const char *key,char && number){
+    if(archive.getDocument().containsKey(key)) number = archive.getDocument()[key];
+}
+
+//uint8_t
+void serialize(OutputArchive &archive,const char *key,uint8_t number){
+    archive.getDocument()[key] = number;
+}
+void deserialize(InputArchive &archive,const char *key,uint8_t && number){
+    if(archive.getDocument().containsKey(key)) number = archive.getDocument()[key];
 }
 
 //float

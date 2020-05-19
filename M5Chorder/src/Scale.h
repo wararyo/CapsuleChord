@@ -63,11 +63,11 @@ public:
     }
     void deserialize(InputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive("key",this->key);
+        archive("key",std::forward<uint8_t>(this->key));
         // Find scale which has its name
         String scaleStr = "";
         archive("scale",std::forward<String>(scaleStr));
-        for(auto i : availableScales){
+        for(auto i : getAvailableScales()){
             if(i->name() == scaleStr) {
                 currentScale = i.get();
                 break;

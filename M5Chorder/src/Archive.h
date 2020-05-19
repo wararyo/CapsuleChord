@@ -135,6 +135,14 @@ void deserialize(InputArchive &archive,const char *key,String && string);
 void serialize(OutputArchive &archive,const char *key,int number);
 void deserialize(InputArchive &archive,const char *key,int && number);
 
+//char
+void serialize(OutputArchive &archive,const char *key,char number);
+void deserialize(InputArchive &archive,const char *key,char && number);
+
+//uint8_t
+void serialize(OutputArchive &archive,const char *key,uint8_t number);
+void deserialize(InputArchive &archive,const char *key,uint8_t && number);
+
 //float
 void serialize(OutputArchive &archive,const char *key,float number);
 void deserialize(InputArchive &archive,const char *key,float && number);
