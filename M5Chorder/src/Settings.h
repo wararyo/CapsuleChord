@@ -16,6 +16,7 @@ public:
     const char *name;
     std::vector<SettingItem*> children;
     SettingItem(){}
+    SettingItem(const char *name): name(name){}
     SettingItem(const char *name,std::vector<SettingItem*> children){
         this->name = name;
         this->children = children;
@@ -36,8 +37,10 @@ public:
 };
 
 class Settings : public SettingItem {
+private:
+    uint version;
 public:
-    Settings(std::vector<SettingItem*> items) : SettingItem("Settings",items){}
+    Settings(std::vector<SettingItem*> items,uint version=1) : SettingItem("Settings",items),version(version){}
     bool load(String path = jsonFilePath){
         //Read file
         char output[maxJsonFileSize] = {'\0'};
@@ -48,15 +51,19 @@ public:
         //Deserialize
         InputArchive archive = InputArchive();
         archive.fromJSON(output);
+        uint jsonVersion = 0;
+        archive("version",std::forward<uint>(jsonVersion));
+        // if(version > jsonVersion) migration.invoke(jsonVersion);
         archive(name,*this);
         return true;
     }
     bool save(String path = jsonFilePath){
         //Serialize
         OutputArchive archive = OutputArchive();
+        archive("version",std::forward<uint>(version));
         archive(name,*this);
         char output[maxJsonFileSize];
-        archive.toJSON(output);
+        archive.toJSON(output,true);
         //Write to file
         File file = SD.open(path,FILE_WRITE);
         if(!file) {
@@ -84,10 +91,10 @@ public:
     }
 };
 
-class SettingItemChord : public SettingItem {
+class SettingItemDegreeChord : public SettingItem {
 public:
-    Chord content;
-    SettingItemChord(const char *name,Chord content){
+    DegreeChord content;
+    SettingItemDegreeChord(const char *name,DegreeChord content){
         this->name = name;
         this->content = content;
     }
@@ -95,7 +102,7 @@ public:
         archive(name,content);
     }
     void deserialize(InputArchive &archive,const char *key) override {
-        archive(name,std::forward<Chord>(content));
+        archive(name,std::forward<DegreeChord>(content));
     }
 };
 
@@ -117,15 +124,48 @@ public:
 class SettingItemBoolean : public SettingItem {
 public:
     bool content;
-    SettingItemBoolean(const char *name,bool content){
-        this->name = name;
-        this->content = content;
-    }
+    SettingItemBoolean(const char *name,bool content)
+        : SettingItem(name), content(content) {}
     void serialize(OutputArchive &archive,const char *key) override {
         archive(name,content);
     }
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<bool>(content));
+    }
+};
+
+class SettingItemNumeric : public SettingItem {
+public:
+    int number;
+    SettingItemNumeric(const char *name,int min, int max, int number)
+        : SettingItem(name), number(number) {}
+        void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,std::forward<int>(number));
+    }
+    void deserialize(InputArchive &archive,const char *key) override {
+        archive(name,std::forward<int>(number));
+    }
+};
+
+class SettingItemEnum : public SettingItem {
+public:
+    std::vector<const char *> memberNames;
+    uint8_t index;
+    SettingItemEnum(const char *name, std::vector<const char *> memberNames, uint8_t index)
+        : SettingItem(name), memberNames(memberNames), index(index) {}
+
+    void serialize(OutputArchive &archive,const char *key) override {
+        archive(name,memberNames[index]);
+    }
+    void deserialize(InputArchive &archive,const char *key) override {
+        String memberName = "";
+        archive(name,std::forward<String>(memberName));
+        for(int i = 0;i < memberNames.size();i++){
+            String m = String(memberNames[i]);
+            if(String(m).equals(memberName)) {
+                index = i;
+            }
+        }
     }
 };
 

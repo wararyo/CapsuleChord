@@ -69,3 +69,22 @@ const std::map<uint16_t,String> Chord::optionStrings = {
         {ThirteenthSharp , "♯13"},
         {ThirteenthFlat  , "♭13"},
     };
+
+DegreeChord::DegreeChord()
+: DegreeChord(I,0) {}
+
+DegreeChord::DegreeChord(uint8_t root, uint16_t option)
+: root(root) , option(option) {}
+
+String DegreeChord::toString() {
+    String str = "";
+    str += rootStrings[root];
+    for(auto item : Chord::optionStrings) {
+        if(option & item.first) {
+            str += item.second;
+        }
+    }
+    return str;
+}
+
+const std::vector<String> DegreeChord::rootStrings = {"I","I#","II","II#","III","IV","IV#","V","V#","VI","VI#","VII"};

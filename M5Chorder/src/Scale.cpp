@@ -13,8 +13,8 @@ String Scale::toString() {
     return Chord::rootStrings[key] + " " + currentScale->name();
 }
 
-Chord Scale::degreeToChord(uint8_t degree, uint8_t offset, Chord base) {
-    return currentScale->degreeToChord(key,degree,offset,base);
+Chord Scale::fromDegree(uint8_t degree, uint8_t offset, Chord base) {
+    return currentScale->fromDegree(key,degree,offset,base);
 }
 
 Chord Scale::getDiatonic(uint8_t degree, bool seventh) {
@@ -51,7 +51,7 @@ const uint16_t MajorScale::diatonicSeventhOptions[] = {
     Chord::Minor|Chord::Seventh,
     Chord::Minor|Chord::Seventh|Chord::FifthFlat};
 
-Chord MajorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
+Chord MajorScale::fromDegree(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
     base.root = key + pitch[degree];
     base.root += offset;
 
@@ -63,7 +63,7 @@ Chord MajorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Cho
 }
 
 Chord MajorScale::getDiatonic(uint8_t key, uint8_t degree, bool seventh) {
-    return degreeToChord(key,degree,0,
+    return fromDegree(key,degree,0,
         Chord(0,seventh?diatonicSeventhOptions[degree]:diatonicOptions[degree]));
 }
 
@@ -90,7 +90,7 @@ const uint16_t MinorScale::diatonicSeventhOptions[] = {
     Chord::Seventh};
 
 
-Chord MinorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
+Chord MinorScale::fromDegree(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
     base.root = key + pitch[degree];
     base.root += offset;
 
@@ -102,6 +102,6 @@ Chord MinorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Cho
 }
 
 Chord MinorScale::getDiatonic(uint8_t key, uint8_t degree, bool seventh) {
-    return degreeToChord(key,degree,0,
+    return fromDegree(key,degree,0,
         Chord(0,seventh?diatonicSeventhOptions[degree]:diatonicOptions[degree]));
 }

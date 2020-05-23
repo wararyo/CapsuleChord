@@ -18,8 +18,20 @@ uint8_t centerNoteNo = 64;
 M5ButtonDrawer buttonDrawer;
 
 typedef std::vector<SettingItem*> si;
+typedef std::vector<const char *> strs;
 Settings settings(si{
-  new SettingItemScale("Scale",Scale(0))
+  new SettingItemEnum("Mode",{"CapsuleChord","CAmDion","Presets"},0),
+  new SettingItemScale("Scale",Scale(0)),
+  new SettingItemEnum("Bass",{"None","C1","C2"},0),
+  new SettingItemEnum("Voicing",{"Open","Closed"},0),
+  new SettingItemNumeric("CenterNoteNo",24,81,60),
+  new SettingItemDegreeChord("Custom 1", DegreeChord(4,Chord::Minor|Chord::MajorSeventh)),
+  new SettingItemDegreeChord("Custom 2", DegreeChord(5,Chord::Minor|Chord::Seventh)),
+  new SettingItem("Keymap",si{
+    new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},0),
+    new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},1)
+  }),
+  new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0)
 });
 
 //画面

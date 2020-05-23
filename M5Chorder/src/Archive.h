@@ -79,9 +79,10 @@ public:
     JsonObject getDocument(){
         return nestStack[nestStack.size()-1];
     }
-    void toJSON(char *out){
+    void toJSON(char *out, bool isPretty = false){
         char output[maxJsonFileSize];
-        serializeJson(doc,output);
+        if(isPretty) serializeJsonPretty(doc,output);
+        else serializeJson(doc,output);
         out = std::move(output);
     }
 };
@@ -135,13 +136,17 @@ void deserialize(InputArchive &archive,const char *key,String && string);
 void serialize(OutputArchive &archive,const char *key,int number);
 void deserialize(InputArchive &archive,const char *key,int && number);
 
-//char
-void serialize(OutputArchive &archive,const char *key,char number);
-void deserialize(InputArchive &archive,const char *key,char && number);
+//uint
+void serialize(OutputArchive &archive,const char *key,uint number);
+void deserialize(InputArchive &archive,const char *key,uint && number);
 
 //uint8_t
 void serialize(OutputArchive &archive,const char *key,uint8_t number);
 void deserialize(InputArchive &archive,const char *key,uint8_t && number);
+
+//char
+void serialize(OutputArchive &archive,const char *key,char number);
+void deserialize(InputArchive &archive,const char *key,char && number);
 
 //float
 void serialize(OutputArchive &archive,const char *key,float number);

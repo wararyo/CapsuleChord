@@ -76,4 +76,44 @@ protected:
     void addMidiNote(std::vector<uint8_t>* notes,uint8_t noteNo);
 };
 
+class DegreeChord {
+    //Root
+    static const uint8_t I       = 0;
+    static const uint8_t ISharp  = 1;
+    static const uint8_t II      = 2;
+    static const uint8_t IISharp = 3;
+    static const uint8_t III     = 4;
+    static const uint8_t IV      = 5;
+    static const uint8_t IVSharp = 6;
+    static const uint8_t V       = 7;
+    static const uint8_t VSharp  = 8;
+    static const uint8_t VI      = 9;
+    static const uint8_t VISharp = 10;
+    static const uint8_t VII     = 11;
+
+public:
+    static const std::vector<String> rootStrings;
+
+    uint8_t root;
+    uint16_t option;
+
+    DegreeChord();
+    DegreeChord(uint8_t root, uint16_t option);
+
+    String toString();
+
+    void serialize(OutputArchive &archive,const char *key) {
+        archive.pushNest(key);
+        archive(AUTO_NVP(root));
+        archive(AUTO_NVP(option));
+        archive.popNest();
+    }
+    void deserialize(InputArchive &archive,const char *key) {
+        archive.pushNest(key);
+        archive(AUTO_NVP(root));
+        archive(AUTO_NVP(option));
+        archive.popNest();
+    }
+};
+
 #endif
