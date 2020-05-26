@@ -9,6 +9,8 @@
 #include "Chord.h"
 #include "Scale.h"
 
+#define MAX_NEST_SIZE 16
+
 const String jsonFilePath = "/capsulechord/settings.json";
 
 class SettingItem {
@@ -49,10 +51,12 @@ public:
         file.read((uint8_t *)output,maxJsonFileSize);
         file.close();
         //Deserialize
+        Serial.println("Start deserialization");
         InputArchive archive = InputArchive();
         archive.fromJSON(output);
         uint jsonVersion = 0;
-        archive("version",std::forward<uint>(jsonVersion));
+        archive("Version",std::forward<uint>(jsonVersion));
+        Serial.printf("Setting file version = %d",jsonVersion);
         // if(version > jsonVersion) migration.invoke(jsonVersion);
         archive(name,*this);
         return true;
@@ -60,7 +64,7 @@ public:
     bool save(String path = jsonFilePath){
         //Serialize
         OutputArchive archive = OutputArchive();
-        archive("version",std::forward<uint>(version));
+        archive("Version",std::forward<uint>(version));
         archive(name,*this);
         char output[maxJsonFileSize];
         archive.toJSON(output,true);
@@ -73,6 +77,34 @@ public:
         file.print(output);
         file.close();
         return true;
+    }
+    SettingItem *findSettingByKey(String query){
+        String keys[MAX_NEST_SIZE] = {String("\0")};
+        // Split query by '/'
+        int index = 0;
+        for(int i = 0; i < query.length(); i++){
+            char tmp = query.charAt(i);
+            if(tmp == '/') {
+                index++;
+                if(index > (MAX_NEST_SIZE - 1)) return nullptr;
+            }
+            else keys[index] += tmp;
+        }
+        // Find item
+        SettingItem * cursor = this;
+        for(String key : keys){
+            if(key == String("\0")) break;
+            auto children = cursor->children;
+            for(SettingItem *k : cursor->children){
+                if(String(k->name) == key){
+                    cursor = k;
+                    goto next_key; // forループを一気に抜けるための使用ならバチは当たらないはず…
+                }
+            }
+            return nullptr;
+next_key: ;
+        }
+        return cursor;
     }
 };
 

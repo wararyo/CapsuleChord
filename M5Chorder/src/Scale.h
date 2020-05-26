@@ -57,16 +57,16 @@ public:
 
     void serialize(OutputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive("key",this->key);
-        archive("scale",currentScale->name());
+        archive("Key",this->key);
+        archive("Scale",currentScale->name());
         archive.popNest();
     }
     void deserialize(InputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive("key",std::forward<uint8_t>(this->key));
+        archive("Key",std::forward<uint8_t>(this->key));
         // Find scale which has its name
         String scaleStr = "";
-        archive("scale",std::forward<String>(scaleStr));
+        archive("Scale",std::forward<String>(scaleStr));
         for(auto i : getAvailableScales()){
             if(i->name() == scaleStr) {
                 currentScale = i.get();

@@ -11,9 +11,10 @@
 #define DEVICE_NAME "BLEChorder"
 
 std::vector<uint8_t> playingNotes;
-Scale scale = Scale(0);
-bool seventh = true;
-uint8_t centerNoteNo = 64;
+
+// Initialize at setup()
+Scale *scale;
+int *centerNoteNo;
 
 M5ButtonDrawer buttonDrawer;
 
@@ -29,7 +30,7 @@ Settings settings(si{
   new SettingItemDegreeChord("Custom 2", DegreeChord(5,Chord::Minor|Chord::Seventh)),
   new SettingItem("Keymap",si{
     new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},0),
-    new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},1)
+    new SettingItemEnum("Fuction 2",{"Gyro","Sustain","Note","CC"},1)
   }),
   new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0)
 });
@@ -73,7 +74,7 @@ void _changeScene_raw() {
     case Scene::Play:
       M5.Lcd.setCursor(0,0);
       M5.Lcd.setTextSize(2);
-      M5.Lcd.println(scale.toString());
+      M5.Lcd.println(scale->toString());
       buttonDrawer.setText(String("Fn"),String("I"),String("Menu"));//TODO:Change it to "Fn, ,Menu"
       buttonDrawer.draw(true);
     break;
@@ -100,7 +101,7 @@ void sendNotes(bool isNoteOn, std::vector<uint8_t> notes, int vel) {
 }
 
 void playChord(Chord chord) {
-  sendNotes(true,chord.toMidiNoteNumbers(centerNoteNo,16),120);
+  sendNotes(true,chord.toMidiNoteNumbers(*centerNoteNo,16),120);
   M5.Lcd.setTextSize(4);
   M5.Lcd.fillRect(0,60,320,120,BLACK);
   M5.Lcd.setTextDatum(CC_DATUM);
@@ -143,17 +144,17 @@ void setup() {
     if(!settings.save()) Serial.println("Setting file creation failed.");
   }
 
-  // Test
-  auto scale = ((SettingItemScale*)settings.children[0])->content;
-  Serial.printf("key = %d,scale = %s",scale.key,scale.currentScale->name());
-  // End test
+  // Get setting items
+  scale = &((SettingItemScale*)settings.findSettingByKey(String("Scale")))->content;
+  centerNoteNo = &((SettingItemNumeric*)settings.findSettingByKey(String("CenterNoteNo")))->number;
 
+  // Scene initialization
   changeScene(Scene::Connection);
   _changeScene_raw();
 
   Midi.begin(DEVICE_NAME, new ServerCallbacks(), NULL);
 
-  //Menu
+  //Menu initialization
   M5ButtonDrawer::width = 106;
 }
 
@@ -171,7 +172,7 @@ void loop() {
         break;
       }
       
-      if(M5.BtnA.wasPressed())  playChord(scale.getDiatonic(0,seventh)); //For testing TODO:delete it
+      if(M5.BtnA.wasPressed())  playChord(scale->getDiatonic(0,true)); //For testing TODO:delete it
       if(M5.BtnA.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
@@ -181,7 +182,7 @@ void loop() {
           case Key_State_Pressed:
             if((event & 0b1110000) == 0) {
               uint8_t number = (event & 0b1111) - 1;
-              if(0 <= number && number <= 6) playChord(scale.getDiatonic(number,seventh));
+              if(0 <= number && number <= 6) playChord(scale->getDiatonic(number,true));
             }
           break;
           case Key_State_Released:

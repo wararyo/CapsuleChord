@@ -59,14 +59,14 @@ public:
 
     void serialize(OutputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive(AUTO_NVP(root));
-        archive(AUTO_NVP(option));
+        archive("Root",root);
+        archive("Option",option);
         archive.popNest();
     }
     void deserialize(InputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive(AUTO_NVP(root));
-        archive(AUTO_NVP(option));
+        archive("Root",root);
+        archive("Option",option);
         archive.popNest();
     }
 
@@ -104,14 +104,14 @@ public:
 
     void serialize(OutputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive(AUTO_NVP(root));
-        archive(AUTO_NVP(option));
+        archive("Root",root);
+        archive("Option",option);
         archive.popNest();
     }
     void deserialize(InputArchive &archive,const char *key) {
         archive.pushNest(key);
-        archive(AUTO_NVP(root));
-        archive(AUTO_NVP(option));
+        archive("Root",root);
+        archive("Option",option);
         archive.popNest();
     }
 };

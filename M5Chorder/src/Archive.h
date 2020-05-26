@@ -103,12 +103,16 @@ public:
     inline void operator()(const char *key,T && arg) {
         deserialize(*this,key,std::forward<T>(arg));
     }
-    void pushNest(const char *key) {
+    bool pushNest(const char *key) {
         JsonObject top = nestStack[nestStack.size()-1];
         if(top.containsKey(key)){
             JsonObject obj = top[key];
-            if(obj.size() > 0) nestStack.push_back(obj);
+            if(obj.size() > 0) {
+                nestStack.push_back(obj);
+                return true;
+            }
         }
+        return false;
     }
     void popNest() {
         if(!nestStack.empty()) nestStack.pop_back();
@@ -158,20 +162,21 @@ void deserialize(InputArchive &archive,const char *key,bool && value);
 
 //std::vector
 template <class T, class A>
-void serialize(OutputArchive &archive,const char *key,std::vector<T, A> list){
+void serialize(OutputArchive &archive,const char *key,std::vector<T, A> && list){
     archive.pushNest(key);
     for(int i = 0;i < list.size();i++) {
-        archive(AUTO_NVP(list[i]));
+        archive("item",std::forward<T>(list[i]));
     }
     archive.popNest();
 }
 template <class T, class A>
 void deserialize(InputArchive &archive,const char *key,std::vector<T, A> && list){
-    archive.pushNest(key);
-    for(int i = 0;i < list.size();i++) {
-        archive(AUTO_NVP(std::forward<T>(list[i])));
+    if(archive.pushNest(key)) {
+        for(int i = 0;i < list.size();i++) {
+            archive(AUTO_NVP(std::forward<T>(list[i])));
+        }
+        archive.popNest();
     }
-    archive.popNest();
 }
 
 //pointer
