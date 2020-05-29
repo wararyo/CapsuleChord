@@ -14,8 +14,8 @@
 class ScaleBase {
 public:
     virtual String name() {return "BaseScale";};
-    virtual Chord fromDegree(uint8_t key, DegreeChord degree);
-    virtual Chord getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base = Chord()){return fromDegree(key,DegreeChord(number,seventh?Chord::Seventh:0));}
+    virtual Chord degreeToChord(uint8_t key, DegreeChord degree);
+    virtual Chord getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base = Chord()){return degreeToChord(key,DegreeChord(number,seventh?Chord::Seventh:0));}
 };
 
 class MajorScale : public ScaleBase {
@@ -24,7 +24,7 @@ public:
     static const uint16_t diatonicSeventhOptions[];
     String name() {return "Major";};
     static const uint8_t pitch[];
-    // Chord fromDegree(uint8_t key, DegreeChord degree, Chord base = Chord()) override;
+    // Chord degreeToChord(uint8_t key, DegreeChord degree, Chord base = Chord()) override;
     Chord getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base = Chord()) override;
 };
 
@@ -34,7 +34,7 @@ public:
     static const uint16_t diatonicSeventhOptions[];
     String name() {return "Minor";};
     static const uint8_t pitch[];
-    // Chord fromDegree(uint8_t key, DegreeChord degree, Chord base = Chord()) override;
+    // Chord degreeToChord(uint8_t key, DegreeChord degree, Chord base = Chord()) override;
     Chord getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base = Chord()) override;
 };
 
@@ -48,7 +48,7 @@ public:
     uint8_t key = 0; //主音 C=0
     ScaleBase *currentScale;
 
-    Chord fromDegree(DegreeChord degree);
+    Chord degreeToChord(DegreeChord degree);
     Chord getDiatonic(uint8_t number, bool seventh, Chord base = Chord());
     String toString();
     static std::vector<std::shared_ptr<ScaleBase>> getAvailableScales();
