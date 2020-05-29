@@ -62,6 +62,7 @@ void _changeScene_raw() {
   //開始処理
   switch(requiredToChangeScene) {
     case Scene::Connection:
+      M5.Lcd.setTextFont(1);
       M5.Lcd.setCursor(0, 48);
       M5.Lcd.setTextSize(4);
       M5.Lcd.println("CapsuleChord");
@@ -79,7 +80,7 @@ void _changeScene_raw() {
       buttonDrawer.draw(true);
     break;
     case Scene::FunctionMenu:
-      // Menu.begin(&settings);
+      Menu.update(true);
     break;
   }
   currentScene = requiredToChangeScene;
@@ -148,14 +149,15 @@ void setup() {
   scale = &((SettingItemScale*)settings.findSettingByKey(String("Scale")))->content;
   centerNoteNo = &((SettingItemNumeric*)settings.findSettingByKey(String("CenterNoteNo")))->number;
 
+  //Menu initialization
+  M5ButtonDrawer::width = 106;
+  Menu.begin(&settings);
+
   // Scene initialization
   changeScene(Scene::Connection);
   _changeScene_raw();
 
   Midi.begin(DEVICE_NAME, new ServerCallbacks(), NULL);
-
-  //Menu initialization
-  M5ButtonDrawer::width = 106;
 }
 
 void loop() {
@@ -172,8 +174,8 @@ void loop() {
         break;
       }
       
-      if(M5.BtnA.wasPressed())  playChord(scale->getDiatonic(0,true)); //For testing TODO:delete it
-      if(M5.BtnA.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
+      if(M5.BtnB.wasPressed())  playChord(scale->getDiatonic(0,true)); //For testing TODO:delete it
+      if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
       while(Keypad.hasEvent()){
@@ -193,7 +195,7 @@ void loop() {
       buttonDrawer.draw();
     break;
     case Scene::FunctionMenu:
-      Menu.update();
+      Menu.update();//Contains M5.update()
       // When requried, back to play scene
       if(Menu.isExitRequired()) changeScene(Scene::Play);
     break;

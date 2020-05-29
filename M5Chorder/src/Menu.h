@@ -14,29 +14,9 @@ typedef std::vector<MenuItem*> vmi;
 class FunctionMenu {
 private:
     Settings *settings;
-    // void callBackKey(MenuItem* sender) {
-    //     MenuItemKey* mi((MenuItemKey*)sender);
-    //     settings->scale.key = mi->value;
-    // }
+    MenuItem* root;
 
-    // void callBackScale(MenuItem* sender) {
-    //     MenuItemKey* mi((MenuItemKey*)sender);
-    //     settings->scale.currentScale = Scale::getAvailableScales()[mi->value].get();
-    // }
-
-    // void callBackSeventh(MenuItem* sender) {
-    //     MenuItemToggle* mi((MenuItemToggle*)sender);
-    //     seventh = mi->value;
-    // }
-
-    // void callBackCenterNoteNo(MenuItem* sender) {
-    //     MenuItemNumeric* mi((MenuItemNumeric*)sender);
-    //     centerNoteNo = mi->value;
-    // }
-public:
-    M5TreeView treeview;
-
-    FunctionMenu() {
+    void initTreeView(){
         treeview.clientRect.x = 60;
         treeview.clientRect.y = 16;
         treeview.clientRect.w = 240;
@@ -44,24 +24,29 @@ public:
         treeview.itemWidth = 192;
         treeview.itemHeight = 24;
         treeview.setTextFont(2);
-        treeview.setItems(vmi{
-            // new MenuItemKey("Key", scale.key, callBackKey),
-            // new MenuItemScale("Scale", 0, callBackScale),
-            // new MenuItemNumeric("CenterNoteNo",24,81,centerNoteNo,callBackCenterNoteNo)
-        });
     }
+
+public:
+    M5TreeView treeview;
+
+    FunctionMenu() {}
 
     void begin(Settings *settings) {
-        treeview.begin();
+        // Apply setting items to treeview
         this->settings = settings;
+        root = settings->getTreeView();
+        if(root != nullptr) treeview.setItems(root->Items);//Remove root
+        
+        initTreeView();
+        treeview.begin();
     }
 
-    void update(){
-        treeview.update();//Contains M5.update(); (probably...)
+    void update(bool redraw = false){
+        treeview.update(redraw);//Contains M5.update(); (probably...)
     }
     // True when the menu wants to exit
     bool isExitRequired() {
-        return M5.BtnA.wasPressed() && (M5TreeView::getFocusItem()->parentItem() == &treeview);
+        return M5.BtnA.wasReleased() && !M5.BtnA.wasReleasefor(300) && (M5TreeView::getFocusItem()->parentItem() == &treeview);
     }
 };
 

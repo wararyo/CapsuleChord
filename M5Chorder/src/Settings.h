@@ -8,6 +8,12 @@
 #include "Archive.h"
 #include "Chord.h"
 #include "Scale.h"
+#include <MenuItem.h>
+#include <MenuItemToggle.h>
+#include <MenuItemNumeric.h>
+#include "MenuItem/Scale.h"
+#include "MenuItem/Key.h"
+#include "MenuItem/Enum.h"
 
 #define MAX_NEST_SIZE 16
 
@@ -35,6 +41,14 @@ public:
         {
             archive(name,std::forward<decltype(children)>(children));
         }
+    }
+    virtual MenuItem *getTreeView() {
+        if(children.empty()) return nullptr;
+        MenuItem *mi = new MenuItem(name,std::vector<MenuItem*>());
+        for(auto i : children) {
+            mi->addItem(i->getTreeView());
+        }
+        return mi;
     }
 };
 
@@ -136,6 +150,9 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<DegreeChord>(content));
     }
+    MenuItem *getTreeView() override {
+        return new MenuItemToggle(name,false);
+    }
 };
 
 class SettingItemScale : public SettingItem {
@@ -151,6 +168,13 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<Scale>(content));
     }
+    MenuItem *getTreeView() override {
+        // MenuItem mi = MenuItem(name,std::vector<MenuItem*>());
+        // mi.addItem(new MenuItemKey("Key",0));
+        // mi.addItem(new MenuItemScale("Scale",0));
+        // return std::move(&mi);
+        return new MenuItemToggle(name,false);
+    }
 };
 
 class SettingItemBoolean : public SettingItem {
@@ -164,18 +188,26 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<bool>(content));
     }
+    MenuItem *getTreeView() override {
+        return new MenuItemToggle(name,content);
+    }
 };
 
 class SettingItemNumeric : public SettingItem {
 public:
     int number;
+    int min;
+    int max;
     SettingItemNumeric(const char *name,int min, int max, int number)
-        : SettingItem(name), number(number) {}
-        void serialize(OutputArchive &archive,const char *key) override {
+        : SettingItem(name), number(number), min(min), max(max) {}
+    void serialize(OutputArchive &archive,const char *key) override {
         archive(name,std::forward<int>(number));
     }
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<int>(number));
+    }
+    MenuItem *getTreeView() override {
+        return new MenuItemNumeric(name,min,max,number);
     }
 };
 
@@ -198,6 +230,9 @@ public:
                 index = i;
             }
         }
+    }
+    MenuItem *getTreeView() override {
+        return new MenuItemEnum(name,memberNames,0);
     }
 };
 
