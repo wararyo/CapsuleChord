@@ -36,7 +36,7 @@ public:
         this->settings = settings;
         root = settings->getTreeView();
         if(root != nullptr) treeview.setItems(root->Items);//Remove root
-        
+
         initTreeView();
         treeview.begin();
     }
@@ -48,6 +48,8 @@ public:
     bool isExitRequired() {
         return M5.BtnA.wasReleased() && !M5.BtnA.wasReleasefor(300) && (M5TreeView::getFocusItem()->parentItem() == &treeview);
     }
+    void save() {settings->save();}
+    void load() {settings->load();}
 };
 
 extern FunctionMenu Menu;

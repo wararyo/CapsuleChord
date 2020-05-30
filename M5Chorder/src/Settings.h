@@ -20,6 +20,26 @@
 const String jsonFilePath = "/capsulechord/settings.json";
 
 class SettingItem {
+protected:
+    // Scheme for executing member functions when the value of TreeView is changed
+    static const int MaxTagCount = 128;
+    static SettingItem* tags[MaxTagCount];
+    int obtainTag() { //Tagを発行する
+        for(int i = 0;i < MaxTagCount;i++) {
+            if(tags[i] == nullptr){
+                tags[i] = this;
+                return i;
+            }
+        }
+        return -1;
+    }
+    void clearTag(int tag){ //Tagを開放する
+        tags[tag] = nullptr;
+    }
+    static void treeViewFunc(MenuItem* mi) {
+        if(tags[mi->tag] != nullptr) tags[mi->tag]->onTreeViewValueChanged(mi);
+    }
+    virtual void onTreeViewValueChanged(MenuItem* mi) {}
 public:
     const char *name;
     std::vector<SettingItem*> children;
@@ -122,20 +142,20 @@ next_key: ;
     }
 };
 
-class SettingItemString : public SettingItem {
-public:
-    const char *content;
-    SettingItemString(const char *name,const char *content){
-        this->name = name;
-        this->content = content;
-    }
-    void serialize(OutputArchive &archive,const char *key) override {
-        archive(name,content);
-    }
-    void deserialize(InputArchive &archive,const char *key) override {
-        archive(name,std::forward<const char *>(content));
-    }
-};
+// class SettingItemString : public SettingItem {
+// public:
+//     const char *content;
+//     SettingItemString(const char *name,const char *content){
+//         this->name = name;
+//         this->content = content;
+//     }
+//     void serialize(OutputArchive &archive,const char *key) override {
+//         archive(name,content);
+//     }
+//     void deserialize(InputArchive &archive,const char *key) override {
+//         archive(name,std::forward<const char *>(content));
+//     }
+// };
 
 class SettingItemDegreeChord : public SettingItem {
 public:
@@ -156,6 +176,9 @@ public:
 };
 
 class SettingItemScale : public SettingItem {
+private:
+    int keyTag;
+    int scaleTag;
 public:
     Scale content;
     SettingItemScale(const char *name,Scale content){
@@ -168,12 +191,23 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<Scale>(content));
     }
+
+    void onTreeViewValueChanged(MenuItem* mi) override {
+        if(mi->tag == keyTag){
+            content.key = ((MenuItemKey*)mi)->value;
+        }
+        else if(mi->tag == scaleTag){
+            content.currentScale = Scale::getAvailableScales()[((MenuItemScale*)mi)->value].get();
+        }
+    }
+
     MenuItem *getTreeView() override {
-        // MenuItem mi = MenuItem(name,std::vector<MenuItem*>());
-        // mi.addItem(new MenuItemKey("Key",0));
-        // mi.addItem(new MenuItemScale("Scale",0));
-        // return std::move(&mi);
-        return new MenuItemToggle(name,false);
+        MenuItem *mi = new MenuItem(name,std::vector<MenuItem*>());
+        keyTag = obtainTag();
+        scaleTag = obtainTag();
+        mi->addItem(new MenuItemKey("Key",content.key,keyTag,treeViewFunc));
+        mi->addItem(new MenuItemScale("Scale",content.getScaleIndex(),scaleTag,treeViewFunc));
+        return mi;
     }
 };
 
@@ -188,8 +222,11 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<bool>(content));
     }
+    void onTreeViewValueChanged(MenuItem* mi) override {
+        content = ((MenuItemToggle*)mi)->value;
+    }
     MenuItem *getTreeView() override {
-        return new MenuItemToggle(name,content);
+        return new MenuItemToggle(name,content,obtainTag(),treeViewFunc);
     }
 };
 
@@ -206,8 +243,11 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<int>(number));
     }
+    void onTreeViewValueChanged(MenuItem* mi) override {
+        number = ((MenuItemNumeric*)mi)->value;
+    }
     MenuItem *getTreeView() override {
-        return new MenuItemNumeric(name,min,max,number);
+        return new MenuItemNumeric(name,min,max,number,obtainTag(),treeViewFunc);
     }
 };
 
@@ -231,8 +271,11 @@ public:
             }
         }
     }
+    void onTreeViewValueChanged(MenuItem* mi) override {
+        index = ((MenuItemEnum*)mi)->value;
+    }
     MenuItem *getTreeView() override {
-        return new MenuItemEnum(name,memberNames,0);
+        return new MenuItemEnum(name,memberNames,index,obtainTag(),treeViewFunc);
     }
 };
 

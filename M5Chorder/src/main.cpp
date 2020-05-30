@@ -197,7 +197,10 @@ void loop() {
     case Scene::FunctionMenu:
       Menu.update();//Contains M5.update()
       // When requried, back to play scene
-      if(Menu.isExitRequired()) changeScene(Scene::Play);
+      if(Menu.isExitRequired()) {
+        Menu.save();
+        changeScene(Scene::Play);
+      }
     break;
   }
   if(currentScene != requiredToChangeScene) _changeScene_raw();

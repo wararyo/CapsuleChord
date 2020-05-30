@@ -52,6 +52,9 @@ public:
     Chord getDiatonic(uint8_t number, bool seventh, Chord base = Chord());
     String toString();
     static std::vector<std::shared_ptr<ScaleBase>> getAvailableScales();
+    int getScaleIndex();
+    int getScaleIndexFromName(String scaleStr);
+    ScaleBase *getScaleFromName(String scaleStr);
 
     void serialize(OutputArchive &archive,const char *key) {
         archive.pushNest(key);
@@ -65,12 +68,7 @@ public:
         // Find scale which has its name
         String scaleStr = "";
         archive("Scale",std::forward<String>(scaleStr));
-        for(auto i : getAvailableScales()){
-            if(i->name() == scaleStr) {
-                currentScale = i.get();
-                break;
-            }
-        }
+        currentScale = getScaleFromName(scaleStr);
         archive.popNest();
     }
 };

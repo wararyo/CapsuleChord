@@ -29,6 +29,31 @@ std::vector<std::shared_ptr<ScaleBase>> Scale::getAvailableScales() {
     return availableScales;
 }
 
+int Scale::getScaleIndex() {
+    for(int i = 0;i < getAvailableScales().size();i++){
+        if(getAvailableScales()[i].get() == currentScale) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int Scale::getScaleIndexFromName(String scaleStr) {
+    for(int i = 0;i < getAvailableScales().size();i++){
+        if(getAvailableScales()[i]->name() == scaleStr) {
+            return i;
+        }
+    }
+}
+
+ScaleBase *Scale::getScaleFromName(String scaleStr) {
+    for(auto i : getAvailableScales()){
+        if(i->name() == scaleStr) {
+            return i.get();
+        }
+    }
+}
+
 //****
 // ScaleBase
 //****
