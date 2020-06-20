@@ -87,4 +87,10 @@ String DegreeChord::toString() {
     return str;
 }
 
+bool DegreeChord::equals(DegreeChord other){
+    if(other.root != this->root) return false;
+    if(other.option != this->option) return false;
+    return true;
+}
+
 const std::vector<String> DegreeChord::rootStrings = {"I","I#","II","II#","III","IV","IV#","V","V#","VI","VI#","VII"};

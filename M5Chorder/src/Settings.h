@@ -14,6 +14,7 @@
 #include "MenuItem/Scale.h"
 #include "MenuItem/Key.h"
 #include "MenuItem/Enum.h"
+#include "MenuItem/DegreeChord.h"
 
 #define MAX_NEST_SIZE 16
 
@@ -142,21 +143,6 @@ next_key: ;
     }
 };
 
-// class SettingItemString : public SettingItem {
-// public:
-//     const char *content;
-//     SettingItemString(const char *name,const char *content){
-//         this->name = name;
-//         this->content = content;
-//     }
-//     void serialize(OutputArchive &archive,const char *key) override {
-//         archive(name,content);
-//     }
-//     void deserialize(InputArchive &archive,const char *key) override {
-//         archive(name,std::forward<const char *>(content));
-//     }
-// };
-
 class SettingItemDegreeChord : public SettingItem {
 public:
     DegreeChord content;
@@ -170,8 +156,14 @@ public:
     void deserialize(InputArchive &archive,const char *key) override {
         archive(name,std::forward<DegreeChord>(content));
     }
+    void onTreeViewValueChanged(MenuItem* mi) override {
+        // content.root = ((MenuItemDegreeChord*)mi)->value;//TODO: 多分これでもうまく行くので検証
+        auto midc = (MenuItemDegreeChord*)mi;
+        content.root = midc->value.root;
+        content.option = midc->value.option;
+    }
     MenuItem *getTreeView() override {
-        return new MenuItemToggle(name,false);
+        return new MenuItemDegreeChord(name, content, obtainTag(), treeViewFunc );
     }
 };
 

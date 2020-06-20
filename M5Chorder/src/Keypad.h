@@ -54,6 +54,7 @@ public:
     void update();
     bool hasEvent();
     char getEvent();
+    void disposeEvents();
 };
 
 extern CapsuleChordKeypad Keypad;

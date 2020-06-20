@@ -102,6 +102,8 @@ public:
 
     String toString();
 
+    bool equals(DegreeChord other);
+
     void serialize(OutputArchive &archive,const char *key) {
         archive.pushNest(key);
         archive("Root",root);
