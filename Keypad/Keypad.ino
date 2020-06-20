@@ -48,6 +48,8 @@
 #define Gyro       0x30 | 1
 #define Sustain    0x30 | 2
 
+//TODO: Board1もColumnを出力に、Rowを入力にする
+
 /*** PIN ***/
 /* I2C */
 // SDA PC4
@@ -60,12 +62,12 @@
 // Column2 PD4 INPUT_PULLUP
 // Column3 PD5 INPUT_PULLUP
 /* Board2 (Modifiers) */
-// Row1 PB0 OUTPUT
-// Row2 PB1 OUTPUT
-// Row3 PB2 OUTPUT
-// Row4 PB3 OUTPUT
-// Column1 PB4 INPUT_PULLUP
-// Column2 PB5 INPUT_PULLUP
+// Row1 PB0 INPUT_PULLUP
+// Row2 PB1 INPUT_PULLUP
+// Row3 PB2 INPUT_PULLUP
+// Row4 PB3 INPUT_PULLUP
+// Column1 PB4 OUTPUT
+// Column2 PB5 OUTPUT
 /* Sliders */
 // PitchUp PD6 INPUT_PULLUP
 // PitchDown PD7 INPUT_PULLUP
@@ -120,8 +122,8 @@ void matrixInit() {
   PORTD &= ~(0b00000000); //cbi
   PORTD |=  (0b00111111); //sbi
 
-  DDRB &= ~(0b00110000); //cbi INPUT
-  DDRB |=  (0b00001111); //sbi OUTPUT
+  DDRB &= ~(0b00001111); //cbi INPUT
+  DDRB |=  (0b00110000); //sbi OUTPUT
   PORTB &= ~(0b00000000); //cbi
   PORTB |=  (0b00111111); //sbi
 }
@@ -178,38 +180,26 @@ void loop()
   setKey(bit_is_clear(PIND,5),IIIm);
   delay(1);
 
-  // /* Board2 */
-  // // Row 1
-  // PORTB &= ~(0b0001); //cbi
-  // PORTB |=  (0b1110); //sbi
-  // delay(1);
-  // setKey(bit_is_clear(PINB,4),Ninth);
-  // setKey(bit_is_clear(PINB,5),Thirteenth);
-  // delay(1);
+  /* Board2 */
+  // Column 1
+  PORTB &= ~(0b010000); //cbi
+  PORTB |=  (0b100000); //sbi
+  delay(1);
+  setKey(bit_is_clear(PINB,0),Ninth);
+  setKey(bit_is_clear(PINB,1),SeventhInvert);
+  setKey(bit_is_clear(PINB,2),Augment);
+  setKey(bit_is_clear(PINB,3),FlatFive);
+  delay(1);
 
-  // // Row 2
-  // PORTB &= ~(0b0010); //cbi
-  // PORTB |=  (0b1101); //sbi
-  // delay(1);
-  // setKey(bit_is_clear(PINB,4),SeventhInvert);
-  // setKey(bit_is_clear(PINB,5),Seventh);
-  // delay(1);
-
-  // // Row 3
-  // PORTB &= ~(0b0100); //cbi
-  // PORTB |=  (0b1011); //sbi
-  // delay(1);
-  // setKey(bit_is_clear(PINB,4),Augment);
-  // setKey(bit_is_clear(PINB,5),Sus4);
-  // delay(1);
-
-  // // Row 4
-  // PORTB &= ~(0b1000); //cbi
-  // PORTB |=  (0b0111); //sbi
-  // delay(1);
-  // setKey(bit_is_clear(PINB,4),FlatFive);
-  // setKey(bit_is_clear(PINB,5),ThirdInvert);
-  // delay(1);
+  // Column 2
+  PORTB &= ~(0b100000); //cbi
+  PORTB |=  (0b010000); //sbi
+  delay(1);
+  setKey(bit_is_clear(PINB,0),Thirteenth);
+  setKey(bit_is_clear(PINB,1),Seventh);
+  setKey(bit_is_clear(PINB,2),Sus4);
+  setKey(bit_is_clear(PINB,3),ThirdInvert);
+  delay(1);
 
   // /* Other */
   // setKey(bit_is_set(PIND,6),PitchUp);
