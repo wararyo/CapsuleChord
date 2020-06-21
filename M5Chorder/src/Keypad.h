@@ -4,6 +4,7 @@
 #include <Wire.h>
 #undef min
 #include <queue>
+#include <map>
 
 #define KEYPAD_I2C_ADDR 0x09
 
@@ -47,14 +48,33 @@
 #define Key_Sustain    0x30 | 2
 
 class CapsuleChordKeypad {
+public: class Key;
 private:
     std::queue<char> _events;
+    std::map<int,Key> keys;
 public:
     void begin();
     void update();
     bool hasEvent();
     char getEvent();
     void disposeEvents();
+    
+    class Key {
+        private:
+            int id;
+            bool mIsPressed;
+        public:
+            void press();
+            void release();
+            Key(){}
+            Key(int keyId): id(keyId) {}
+            bool isPressed();
+    };
+
+    Key operator [](int key){
+        if(keys.find(key) == keys.end()) keys[key] = Key(key); // create if not exist
+        return keys[key];
+    }
 };
 
 extern CapsuleChordKeypad Keypad;

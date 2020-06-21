@@ -1,4 +1,5 @@
 #include "Keypad.h"
+#include <M5Stack.h>
 
 void CapsuleChordKeypad::begin() {
     Wire.begin();
@@ -9,6 +10,13 @@ void CapsuleChordKeypad::update() {
     while(Wire.available()) {
         int val = Wire.read();
         if(val != 0) {
+            // Update keys
+            int state = val & 0b10000000;
+            int key   = val & 0b01111111;
+            if(keys.find(key) != keys.end()) {
+                if(state == Key_State_Pressed) keys[key].press();
+                else keys[key].release();
+            }
             _events.push((char)val);
         }
     }
@@ -27,6 +35,19 @@ char CapsuleChordKeypad::getEvent() {
 void CapsuleChordKeypad::disposeEvents() {
     std::queue<char> empty;
     std::swap( _events, empty );
+}
+
+void CapsuleChordKeypad::Key::press() {
+    Serial.println("Keypad pressed");
+    mIsPressed = true;
+}
+
+void CapsuleChordKeypad::Key::release() {
+    mIsPressed = false;
+}
+
+bool CapsuleChordKeypad::Key::isPressed() {
+    return mIsPressed;
 }
 
 CapsuleChordKeypad Keypad;

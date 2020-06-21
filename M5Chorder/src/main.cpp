@@ -7,10 +7,13 @@
 #include "Scale.h"
 #include "Keypad.h"
 #include "Menu.h"
+#include "Modifier.h"
 
 #define DEVICE_NAME "BLEChorder"
 
 std::vector<uint8_t> playingNotes;
+bool seventh = false;
+int option = 0;
 
 // Initialize at setup()
 Scale *scale;
@@ -174,7 +177,18 @@ void loop() {
         break;
       }
       
-      if(M5.BtnB.wasPressed())  playChord(scale->getDiatonic(0,true)); //For testing TODO:delete it
+      if(M5.BtnB.wasPressed()) {
+        Chord c = scale->getDiatonic(0,Keypad[Key_Seventh].isPressed());
+        if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
+        if(Keypad[Key_FifthFlat].isPressed())     fifthFlat(&c);
+        if(Keypad[Key_Augment].isPressed())       augment(&c);
+        if(Keypad[Key_Sus4].isPressed())          sus4(&c);
+        // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
+        if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
+        if(Keypad[Key_Ninth].isPressed())         ninth(&c);
+        if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
+        playChord(c);
+      }
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
@@ -182,9 +196,22 @@ void loop() {
         char event = Keypad.getEvent();
         switch(event >> 7 & 0b1) {
           case Key_State_Pressed:
-            if((event & 0b1110000) == 0) {
-              uint8_t number = (event & 0b1111) - 1;
-              if(0 <= number && number <= 6) playChord(scale->getDiatonic(number,true));
+            switch(event >> 4 & 0b111) {
+              case 0: {// Numbers Pressed
+                uint8_t number = (event & 0b1111) - 1;
+                if(0 <= number && number <= 6) {
+                  Chord c = scale->getDiatonic(number,Keypad[Key_Seventh].isPressed());
+                  if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
+                  if(Keypad[Key_FifthFlat].isPressed())     fifthFlat(&c);
+                  if(Keypad[Key_Augment].isPressed())       augment(&c);
+                  if(Keypad[Key_Sus4].isPressed())          sus4(&c);
+                  // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
+                  if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
+                  if(Keypad[Key_Ninth].isPressed())         ninth(&c);
+                  if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
+                  playChord(c);
+                }
+              } break;
             }
           break;
           case Key_State_Released:
