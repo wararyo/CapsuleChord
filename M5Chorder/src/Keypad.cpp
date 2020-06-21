@@ -1,5 +1,4 @@
 #include "Keypad.h"
-#include <M5Stack.h>
 
 void CapsuleChordKeypad::begin() {
     Wire.begin();
@@ -38,7 +37,6 @@ void CapsuleChordKeypad::disposeEvents() {
 }
 
 void CapsuleChordKeypad::Key::press() {
-    Serial.println("Keypad pressed");
     mIsPressed = true;
 }
 
