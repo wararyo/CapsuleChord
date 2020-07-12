@@ -24,19 +24,24 @@ The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23Capsul
 
 ## Required to make
 
+### M5Stack
+
 * M5Stack Gray
 * M5Stack battery module
 * M5Stack proto module
 
+### Keypads
+
 * ATmega328P
 * 23 tactile switches
 * 8 diodes
+
+### Other
+
 * Two 3pin connectors and sockets
 * Two 8pin connectors and sockets
-
 * Six 2M tapping screws (to mount keypads)
 * Four 3M tapping scress (to close the casing)
 * Two 3M tapping scress (to mount the M5Stack)
-
 * AVRISP of some kind
 * and a 3D printing environment :)
