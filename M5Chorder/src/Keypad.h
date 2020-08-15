@@ -20,24 +20,24 @@
 #define Key_State_Released 1
 
 // Numbers (Group 1)
-#define Key_I 1
-#define Key_IIm 2
-#define Key_IIIm 3
+#define Key_Custom1 1
+#define Key_VIIdim 2
+#define Key_Custom2 3
 #define Key_IV 4
-#define Key_V 5
-#define Key_VIm 6
-#define Key_VIIdim 7
-#define Key_Custom1 8
-#define Key_Custom2 9
+#define Key_I 5
+#define Key_V 6
+#define Key_IIm 7
+#define Key_VIm 8
+#define Key_IIIm 9
 // Modifiers (Group 2)
-#define Key_ThirdInvert   0x10 | 1
-#define Key_FifthFlat     0x10 | 2
-#define Key_Augment       0x10 | 3
-#define Key_Sus4          0x10 | 4
-#define Key_Seventh       0x10 | 5
-#define Key_SeventhInvert 0x10 | 6
-#define Key_Ninth         0x10 | 7
-#define Key_Thirteenth    0x10 | 8
+#define Key_Thirteenth    0x10 | 1
+#define Key_Ninth         0x10 | 2
+#define Key_Sus4          0x10 | 3
+#define Key_Augment       0x10 | 4
+#define Key_SeventhInvert 0x10 | 5
+#define Key_Seventh       0x10 | 6
+#define Key_FlatFive      0x10 | 7
+#define Key_ThirdInvert   0x10 | 8
 // Sliders (Group 3)
 #define Key_PitchUp       0x20 | 1
 #define Key_PitchDown     0x20 | 2
