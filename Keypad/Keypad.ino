@@ -21,24 +21,24 @@
 #define RELEASED 1
 
 // Numbers (Group 1)
-#define I 1
-#define IIm 2
-#define IIIm 3
+#define Custom1 1
+#define VIIdim 2
+#define Custom2 3
 #define IV 4
-#define V 5
-#define VIm 6
-#define VIIdim 7
-#define Custom1 8
-#define Custom2 9
+#define I 5
+#define V 6
+#define IIm 7
+#define VIm 8
+#define IIIm 9
 // Modifiers (Group 2)
-#define ThirdInvert   0x10 | 1
-#define FlatFive      0x10 | 2
-#define Augment       0x10 | 3
-#define Sus4          0x10 | 4
-#define Seventh       0x10 | 5
-#define SeventhInvert 0x10 | 6
-#define Ninth         0x10 | 7
-#define Thirteenth    0x10 | 8
+#define Thirteenth    0x10 | 1
+#define Ninth         0x10 | 2
+#define Sus4          0x10 | 3
+#define Augment       0x10 | 4
+#define SeventhInvert 0x10 | 5
+#define Seventh       0x10 | 6
+#define FlatFive      0x10 | 7
+#define ThirdInvert   0x10 | 8
 // Sliders (Group 3)
 #define PitchUp       0x20 | 1
 #define PitchDown     0x20 | 2
@@ -178,7 +178,7 @@ void loop()
   setKey(bit_is_clear(PIND,3),IIm);
   setKey(bit_is_clear(PIND,4),VIm);
   setKey(bit_is_clear(PIND,5),IIIm);
-  delay(1);
+  delay(2);
 
   /* Board2 */
   // Column 1
@@ -199,14 +199,14 @@ void loop()
   setKey(bit_is_clear(PINB,1),Seventh);
   setKey(bit_is_clear(PINB,2),Sus4);
   setKey(bit_is_clear(PINB,3),ThirdInvert);
-  delay(1);
+  delay(2);
 
-  // /* Other */
-  // setKey(bit_is_set(PIND,6),PitchUp);
-  // setKey(bit_is_set(PIND,7),PitchDown);
-  // setKey(bit_is_set(PINB,6),InversionUp);
-  // setKey(bit_is_set(PINB,7),InversionDown);
-  // setKey(bit_is_set(PINC,0),Gyro);
-  // setKey(bit_is_set(PINC,1),Sustain);
-  // delay(1);
+  /* Other */
+  setKey(bit_is_set(PIND,6),PitchUp);
+  setKey(bit_is_set(PIND,7),PitchDown);
+  setKey(bit_is_set(PINB,6),InversionUp);
+  setKey(bit_is_set(PINB,7),InversionDown);
+  setKey(bit_is_set(PINC,0),Gyro);
+  setKey(bit_is_set(PINC,1),Sustain);
+  delay(2);
 }
