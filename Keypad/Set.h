@@ -11,12 +11,12 @@ class Set {
   public:
     Set(int size,T (*initializer)(),char (*validator)(T), char (*comparator)(T,T)) {
       _data = new T[size];
-      for(int i = 0;i < _size;i++) _data[i] = initializer();//初期化
       _size = size;
       _count = 0;
       _validator = validator;
       _initializer = initializer;
       _comparator = comparator;
+      for(int i = 0;i < _size;i++) _data[i] = _initializer();//初期化
     }
     inline int count();
     inline int size();
