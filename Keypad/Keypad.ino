@@ -114,6 +114,9 @@ void setup()
   sbi(PORTB,7);//InversionDown
   sbi(PORTC,0);//Gyro
   sbi(PORTC,1);//Sustain
+
+  sbi(DDRC,3);//Debug LED
+  cbi(PORTC,3);//Debug LED
 }
 
 void matrixInit() {
@@ -142,7 +145,10 @@ void setKey(char state, char button) {
   char event = (state & 1) << 7 | button & 0b01111111;
   switch(state){
     case PRESSED:
-      if(pressing.Add(button)) events.push(event);
+      if(pressing.Add(button)) {
+        events.push(event);
+        tbi(PORTC,3);
+      }
     break;
     case RELEASED:
       if(pressing.Remove(button)) events.push(event);
@@ -202,11 +208,11 @@ void loop()
   delay(2);
 
   /* Other */
-  setKey(bit_is_set(PIND,6),PitchUp);
-  setKey(bit_is_set(PIND,7),PitchDown);
-  setKey(bit_is_set(PINB,6),InversionUp);
-  setKey(bit_is_set(PINB,7),InversionDown);
-  setKey(bit_is_set(PINC,0),Gyro);
-  setKey(bit_is_set(PINC,1),Sustain);
+  setKey(bit_is_clear(PIND,6),PitchUp);
+  setKey(bit_is_clear(PIND,7),PitchDown);
+  setKey(bit_is_clear(PINB,6),InversionUp);
+  setKey(bit_is_clear(PINB,7),InversionDown);
+  setKey(bit_is_clear(PINC,0),Gyro);
+  setKey(bit_is_clear(PINC,1),Sustain);
   delay(2);
 }
