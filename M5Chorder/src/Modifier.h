@@ -27,4 +27,13 @@ void thirteenth(Chord *c){
   c->option |= Chord::Thirteenth;
 }
 
+void pitchUp(Chord *c) {
+  if(c->root == 11) c->root = 0;
+  else c->root++;
+}
+void pitchDown(Chord *c) {
+  if(c->root == 0) c->root = 11;
+  else c->root--;
+}
+
 #endif
