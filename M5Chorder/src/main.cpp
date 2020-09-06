@@ -8,6 +8,8 @@
 #include "Keypad.h"
 #include "Menu.h"
 #include "Modifier.h"
+#include "Mode/ModeBase.h"
+#include "Context.h"
 
 #define DEVICE_NAME "BLEChorder"
 
@@ -18,6 +20,7 @@ int option = 0;
 // Initialize at setup()
 Scale *scale;
 int *centerNoteNo;
+Context context;
 
 M5ButtonDrawer buttonDrawer;
 
@@ -38,7 +41,6 @@ Settings settings(si{
   new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0)
 });
 
-//画面
 enum Scene : uint8_t {
   Connection,
   Play,
@@ -152,6 +154,9 @@ void setup() {
   scale = &((SettingItemScale*)settings.findSettingByKey(String("Scale")))->content;
   centerNoteNo = &((SettingItemNumeric*)settings.findSettingByKey(String("CenterNoteNo")))->number;
 
+  // Make Context
+  context = Context(&settings);
+
   //Menu initialization
   M5ButtonDrawer::width = 106;
   Menu.begin(&settings);
@@ -192,35 +197,8 @@ void loop() {
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
-      while(Keypad.hasEvent()){
-        char event = Keypad.getEvent();
-        switch(event >> 7 & 0b1) {
-          case Key_State_Pressed:
-            switch(event >> 4 & 0b111) {
-              case 0: {// Numbers Pressed
-                uint8_t number = (event & 0b1111) - 1;
-                if(0 <= number && number <= 6) {
-                  Chord c = scale->getDiatonic(number,Keypad[Key_Seventh].isPressed());
-                  if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
-                  if(Keypad[Key_FlatFive].isPressed())     fifthFlat(&c);
-                  if(Keypad[Key_Augment].isPressed())       augment(&c);
-                  if(Keypad[Key_Sus4].isPressed())          sus4(&c);
-                  // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
-                  if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
-                  if(Keypad[Key_Ninth].isPressed())         ninth(&c);
-                  if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
-                  if(Keypad[Key_PitchUp].isPressed()) pitchUp(&c);
-                  if(Keypad[Key_PitchDown].isPressed()) pitchDown(&c);
-                  playChord(c);
-                }
-              } break;
-            }
-          break;
-          case Key_State_Released:
-            if((event & 0b1110000) == 0) sendNotes(false,std::vector<uint8_t>(),120);
-          break;
-        }
-      }
+      ModeBase::getAvailableModes()[0].get()->update();
+      
       buttonDrawer.draw();
     break;
     case Scene::FunctionMenu:
