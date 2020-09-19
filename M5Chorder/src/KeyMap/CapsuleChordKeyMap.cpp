@@ -1,7 +1,7 @@
-#include "CapsuleChordMode.h"
+#include "CapsuleChordKeyMap.h"
 #include "Modifier.h"
 
-void CapsuleChordMode::update() {
+void CapsuleChordKeyMap::update() {
   while(Keypad.hasEvent()){
     char event = Keypad.getEvent();
     switch(event >> 7 & 0b1) {

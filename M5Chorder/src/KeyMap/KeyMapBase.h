@@ -1,15 +1,15 @@
-#ifndef _KEYMODEBASE_H_
-#define _KEYMODEBASE_H_
+#ifndef _KEYMAPBASE_H_
+#define _KEYMAPBASE_H_
 
 #include "Context.h"
 
-class KeyModeBase {
+class KeyMapBase {
 public:
   virtual void update() {}
   virtual void setting() {}
   Context *context;
 
-  KeyModeBase() {
+  KeyMapBase() {
     context = Context::getContext();
   }
 };

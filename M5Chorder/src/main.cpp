@@ -7,8 +7,7 @@
 #include "Scale.h"
 #include "Keypad.h"
 #include "Menu.h"
-// #include "Modifier.h"
-#include "Mode/KeyMode.h"
+#include "KeyMap/KeyMap.h"
 #include "Context.h"
 
 #define DEVICE_NAME "BLEChorder"
@@ -199,7 +198,7 @@ void loop() {
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
-      KeyMode::getAvailableModes()[0].get()->update();
+      KeyMap::getAvailableKeyMaps()[0].get()->update();
       
       buttonDrawer.draw();
     break;
