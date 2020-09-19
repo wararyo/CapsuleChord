@@ -7,8 +7,8 @@
 #include "Scale.h"
 #include "Keypad.h"
 #include "Menu.h"
-#include "Modifier.h"
-#include "Mode/ModeBase.h"
+// #include "Modifier.h"
+#include "Mode/KeyMode.h"
 #include "Context.h"
 
 #define DEVICE_NAME "BLEChorder"
@@ -156,6 +156,8 @@ void setup() {
 
   // Make Context
   context = Context(&settings);
+  context.playChord = playChord;
+  context.sendNotes = sendNotes;
 
   //Menu initialization
   M5ButtonDrawer::width = 106;
@@ -182,22 +184,22 @@ void loop() {
         break;
       }
       
-      if(M5.BtnB.wasPressed()) {
-        Chord c = scale->getDiatonic(0,Keypad[Key_Seventh].isPressed());
-        if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
-        if(Keypad[Key_FlatFive].isPressed())     fifthFlat(&c);
-        if(Keypad[Key_Augment].isPressed())       augment(&c);
-        if(Keypad[Key_Sus4].isPressed())          sus4(&c);
-        // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
-        if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
-        if(Keypad[Key_Ninth].isPressed())         ninth(&c);
-        if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
-        playChord(c);
-      }
+      // if(M5.BtnB.wasPressed()) {
+      //   Chord c = scale->getDiatonic(0,Keypad[Key_Seventh].isPressed());
+      //   if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
+      //   if(Keypad[Key_FlatFive].isPressed())     fifthFlat(&c);
+      //   if(Keypad[Key_Augment].isPressed())       augment(&c);
+      //   if(Keypad[Key_Sus4].isPressed())          sus4(&c);
+      //   // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
+      //   if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
+      //   if(Keypad[Key_Ninth].isPressed())         ninth(&c);
+      //   if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
+      //   playChord(c);
+      // }
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
-      ModeBase::getAvailableModes()[0].get()->update();
+      KeyMode::getAvailableModes()[0].get()->update();
       
       buttonDrawer.draw();
     break;
