@@ -157,6 +157,7 @@ void setup() {
   context = Context(&settings);
   context.playChord = playChord;
   context.sendNotes = sendNotes;
+  Context::setContext(&context);
 
   //Menu initialization
   M5ButtonDrawer::width = 106;
