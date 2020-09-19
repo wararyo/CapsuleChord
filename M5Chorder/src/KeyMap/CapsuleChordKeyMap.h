@@ -9,6 +9,7 @@ class CapsuleChordKeyMap : public KeyMapBase {
 public:
     using KeyMapBase::KeyMapBase;
     void update() override;
+    static const uint8_t numberKeyMap[]; //Key and diatonic chord matching
 };
 
 #endif
