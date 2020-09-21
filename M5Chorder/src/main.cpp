@@ -72,14 +72,19 @@ void _changeScene_raw() {
   switch(requiredToChangeScene) {
     case Scene::Connection:
       M5.Lcd.setTextFont(1);
-      M5.Lcd.setCursor(0, 48);
-      M5.Lcd.setTextSize(4);
-      M5.Lcd.println("CapsuleChord");
-      M5.Lcd.setTextSize(2);
-      M5.Lcd.println("BLE MIDI Chordpad Device\n");
-      M5.Lcd.setTextSize(1);
-      M5.Lcd.println("Advertising...");
-      M5.Lcd.println("Press the button A to power off.");
+      if(SD.exists("/capsulechord/splash.jpg")){
+        M5.Lcd.drawJpgFile(SD, "/capsulechord/splash.jpg");
+      }
+      else {
+        M5.Lcd.setCursor(0, 48);
+        M5.Lcd.setTextSize(4);
+        M5.Lcd.println("CapsuleChord");
+        M5.Lcd.setTextSize(2);
+        M5.Lcd.println("BLE MIDI Chordpad Device\n");
+        M5.Lcd.setTextSize(1);
+        M5.Lcd.println("Advertising...");
+        M5.Lcd.println("Press the button A to power off.");
+      }
     break;
     case Scene::Play:
       M5.Lcd.setCursor(0,0);
