@@ -42,7 +42,8 @@ Settings settings(si{
     new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},0),
     new SettingItemEnum("Fuction 2",{"Gyro","Sustain","Note","CC"},1)
   }),
-  new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0)
+  new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0),
+  new SettingItemEnum("Brightness", {"Bright","Normal","Dark"},1)
 });
 
 enum Scene : uint8_t {
@@ -163,6 +164,13 @@ void setup() {
   // Get setting items
   scale = &((SettingItemScale*)settings.findSettingByKey(String("Scale")))->content;
   centerNoteNo = &((SettingItemNumeric*)settings.findSettingByKey(String("CenterNoteNo")))->number;
+
+  // Set lcd brightness
+  switch(((SettingItemEnum*)settings.findSettingByKey(String("Brightness")))->index) {
+    case 0: M5.Lcd.setBrightness(255); break;
+    case 1: M5.Lcd.setBrightness(127); break;
+    case 2: M5.Lcd.setBrightness(32); break;
+  }
 
   // Make Context
   context = Context(&settings);
