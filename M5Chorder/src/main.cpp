@@ -6,15 +6,20 @@
 #include "Chord.h"
 #include "Scale.h"
 #include "Keypad.h"
+#include "GyroSensor.h"
 #include "Menu.h"
 #include "KeyMap/KeyMap.h"
 #include "Context.h"
 
-#define DEVICE_NAME "BLEChorder"
+#define DEVICE_NAME "CapsuleChord"
 
 std::vector<uint8_t> playingNotes;
 bool seventh = false;
 int option = 0;
+
+float expression = 64;
+
+unsigned long lastLoopMillis = 0;
 
 // Initialize at setup()
 Scale *scale;
@@ -80,7 +85,7 @@ void _changeScene_raw() {
       M5.Lcd.setCursor(0,0);
       M5.Lcd.setTextSize(2);
       M5.Lcd.println(scale->toString());
-      buttonDrawer.setText(String("Fn"),String("I"),String("Menu"));//TODO:Change it to "Fn, ,Menu"
+      buttonDrawer.setText(String("Fn"),String(""),String("Menu"));//TODO:Change it to "Fn, ,Menu"
       buttonDrawer.draw(true);
     break;
     case Scene::FunctionMenu:
@@ -139,6 +144,7 @@ void setup() {
   }
 
   Keypad.begin();
+  Gyro.begin();
   // Decline speaker noise
   M5.Speaker.begin();
   M5.Speaker.mute();
@@ -183,23 +189,18 @@ void loop() {
         changeScene(Scene::FunctionMenu);
         break;
       }
-      
-      // if(M5.BtnB.wasPressed()) {
-      //   Chord c = scale->getDiatonic(0,Keypad[Key_Seventh].isPressed());
-      //   if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
-      //   if(Keypad[Key_FlatFive].isPressed())     fifthFlat(&c);
-      //   if(Keypad[Key_Augment].isPressed())       augment(&c);
-      //   if(Keypad[Key_Sus4].isPressed())          sus4(&c);
-      //   // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
-      //   if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
-      //   if(Keypad[Key_Ninth].isPressed())         ninth(&c);
-      //   if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
-      //   playChord(c);
-      // }
       if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
 
       Keypad.update();
       KeyMap::getAvailableKeyMaps()[0].get()->update();
+      if(Keypad[Key_Gyro].isPressed()){
+        Gyro.update();
+        if(Gyro.deltaTime > 0.5f) return;
+        expression -= Gyro.latestX * Gyro.deltaTime * 2;//TODO: make 2 pref item
+        if(expression < 0) expression = 0;
+        if(expression > 127) expression = 127;
+        Midi.sendCC(11,(uint8_t)expression);
+      }
       
       buttonDrawer.draw();
     break;
@@ -213,4 +214,6 @@ void loop() {
     break;
   }
   if(currentScene != requiredToChangeScene) _changeScene_raw();
+  while(millis() - lastLoopMillis < 17); // Keep 60fps
+  lastLoopMillis = millis();
 }

@@ -16,7 +16,7 @@ public:
     BLEAdvertising *advertising;
     BLECharacteristic *characteristic;
 
-    std::string deviceName = "CapsuleChord";
+    std::string deviceName = "BLE MIDI Device";
     std::string midiServiceUUID = MIDI_SERVICE_UUID;
     std::string midiCharacteristicUUID = MIDI_CHARACTERISTIC_UUID;
 
@@ -27,6 +27,8 @@ public:
         BLECharacteristicCallbacks *chatacteristicCallback);
 
     void sendNote(uint8_t status, uint8_t noteNo, uint8_t vel);
+
+    void sendCC(uint8_t ccNo, uint8_t value);
 };
 
 extern BLEMidi Midi;

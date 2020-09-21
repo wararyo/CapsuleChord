@@ -50,8 +50,23 @@ void BLEMidi::sendNote(uint8_t status, uint8_t noteNo, uint8_t vel) {
         0x00   // velocity
     };
     midiPacket[2] = status; // note on/off, channel 0
-    midiPacket[3] = noteNo;
-    midiPacket[4] = vel;
+    midiPacket[3] = noteNo & 0b01111111;
+    midiPacket[4] = vel & 0b01111111;
+    characteristic->setValue(midiPacket, 5); // packet, length in bytes)
+    characteristic->notify();
+}
+
+void BLEMidi::sendCC(uint8_t ccNo, uint8_t value) {
+    uint8_t midiPacket[] = {
+        0x80,  // header
+        0x80,  // timestamp, not implemented
+        0xB0,  // status
+        0x00,  // CC#
+        0x00   // value
+    };
+    midiPacket[2] = 0xB0; // cc, channel 0
+    midiPacket[3] = ccNo & 0b01111111;
+    midiPacket[4] = value & 0b01111111;
     characteristic->setValue(midiPacket, 5); // packet, length in bytes)
     characteristic->notify();
 }
