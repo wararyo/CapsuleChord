@@ -81,7 +81,7 @@ const uint16_t MajorScale::diatonicOptions[] = {
     0,
     0,
     Chord::Minor,
-    Chord::Dimish};
+    Chord::Minor|Chord::FifthFlat};
 const uint16_t MajorScale::diatonicSeventhOptions[] = {
     Chord::MajorSeventh,
     Chord::Minor|Chord::Seventh,
