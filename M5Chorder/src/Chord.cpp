@@ -25,20 +25,31 @@ std::vector<uint8_t> Chord::toMidiNoteNumbers(uint8_t centerNoteNo, uint8_t regi
 
     std::vector<uint8_t> notes = std::vector<uint8_t>();
 
+    //Root
     addMidiNote(&notes, baseNoteNo);
 
     //Third
-    if(option & Sus4) addMidiNote(&notes, baseNoteNo + 6);
+    if(option & Sus4) addMidiNote(&notes, baseNoteNo + 5);
     else if(option & Minor) addMidiNote(&notes, baseNoteNo + 3);
     else addMidiNote(&notes, baseNoteNo + 4); //Major
 
     //Fifth
     if(option & FifthFlat) addMidiNote(&notes, baseNoteNo + 6);
+    else if(option & Aug) addMidiNote(&notes, baseNoteNo + 8);
     else addMidiNote(&notes, baseNoteNo + 7);
 
     //Seventh
     if(option & Seventh) addMidiNote(&notes, baseNoteNo + 10);
-    if(option & MajorSeventh) addMidiNote(&notes, baseNoteNo + 11);
+    else if(option & MajorSeventh) addMidiNote(&notes, baseNoteNo + 11);
+
+    //Ninth
+    if(option & Ninth) addMidiNote(&notes, baseNoteNo + 14);
+
+    //Eleventh
+    if(option & Eleventh) addMidiNote(&notes, baseNoteNo + 17);
+
+    //Eleventh
+    if(option & Thirteenth) addMidiNote(&notes, baseNoteNo + 21);
 
     return notes;
 }
@@ -60,7 +71,7 @@ const std::map<uint16_t,String> Chord::optionStrings = {
         {Seventh, "7"},
         {MajorSeventh, "M7"},
         {Sixth, "6"},
-        {FifthFlat       , "♭5"},
+        {FifthFlat       , "-5"},
         {Ninth           , "9"},
         {NinthSharp      , "♯9"},
         {Eleventh        , "11"},
@@ -69,3 +80,28 @@ const std::map<uint16_t,String> Chord::optionStrings = {
         {ThirteenthSharp , "♯13"},
         {ThirteenthFlat  , "♭13"},
     };
+
+DegreeChord::DegreeChord()
+: DegreeChord(I,0) {}
+
+DegreeChord::DegreeChord(uint8_t root, uint16_t option)
+: root(root) , option(option) {}
+
+String DegreeChord::toString() {
+    String str = "";
+    str += rootStrings[root];
+    for(auto item : Chord::optionStrings) {
+        if(option & item.first) {
+            str += item.second;
+        }
+    }
+    return str;
+}
+
+bool DegreeChord::equals(DegreeChord other){
+    if(other.root != this->root) return false;
+    if(other.option != this->option) return false;
+    return true;
+}
+
+const std::vector<String> DegreeChord::rootStrings = {"I","I#","II","II#","III","IV","IV#","V","V#","VI","VI#","VII"};

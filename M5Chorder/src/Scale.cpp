@@ -13,12 +13,12 @@ String Scale::toString() {
     return Chord::rootStrings[key] + " " + currentScale->name();
 }
 
-Chord Scale::degreeToChord(uint8_t degree, uint8_t offset, Chord base) {
-    return currentScale->degreeToChord(key,degree,offset,base);
+Chord Scale::degreeToChord(DegreeChord degree) {
+    return currentScale->degreeToChord(key,degree);
 }
 
-Chord Scale::getDiatonic(uint8_t degree, bool seventh) {
-    return currentScale->getDiatonic(key,degree,seventh);
+Chord Scale::getDiatonic(uint8_t degree, bool seventh, Chord base) {
+    return currentScale->getDiatonic(key,degree,seventh,base);
 }
 
 std::vector<std::shared_ptr<ScaleBase>> Scale::getAvailableScales() {
@@ -27,6 +27,46 @@ std::vector<std::shared_ptr<ScaleBase>> Scale::getAvailableScales() {
         availableScales.push_back(std::make_shared<MinorScale>());
     }
     return availableScales;
+}
+
+int Scale::getScaleIndex() {
+    for(int i = 0;i < getAvailableScales().size();i++){
+        if(getAvailableScales()[i].get() == currentScale) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int Scale::getScaleIndexFromName(String scaleStr) {
+    for(int i = 0;i < getAvailableScales().size();i++){
+        if(getAvailableScales()[i]->name() == scaleStr) {
+            return i;
+        }
+    }
+}
+
+ScaleBase *Scale::getScaleFromName(String scaleStr) {
+    for(auto i : getAvailableScales()){
+        if(i->name() == scaleStr) {
+            return i.get();
+        }
+    }
+}
+
+//****
+// ScaleBase
+//****
+
+Chord ScaleBase::degreeToChord(uint8_t key, DegreeChord degree) {
+    Chord c = Chord(0,degree.option);
+    c.root = key + degree.root;
+
+    //0から12の範囲内に収める
+    while(c.root < 0)  c.root += 12;
+    while(c.root >= 12)  c.root -= 12;
+
+    return c;
 }
 
 //****
@@ -51,20 +91,9 @@ const uint16_t MajorScale::diatonicSeventhOptions[] = {
     Chord::Minor|Chord::Seventh,
     Chord::Minor|Chord::Seventh|Chord::FifthFlat};
 
-Chord MajorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
-    base.root = key + pitch[degree];
-    base.root += offset;
-
-    //0から12の範囲内に収める
-    while(base.root < 0)  base.root += 12;
-    while(base.root >= 12)  base.root -= 12;
-
-    return base;
-}
-
-Chord MajorScale::getDiatonic(uint8_t key, uint8_t degree, bool seventh) {
-    return degreeToChord(key,degree,0,
-        Chord(0,seventh?diatonicSeventhOptions[degree]:diatonicOptions[degree]));
+Chord MajorScale::getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base) {
+    // return degreeToChord(key,degree,0, Chord(0,seventh?diatonicSeventhOptions[degree]:diatonicOptions[degree]));
+    return degreeToChord(key,DegreeChord(pitch[number], base.option | seventh?diatonicSeventhOptions[number]:diatonicOptions[number]));
 }
 
 //****
@@ -89,20 +118,6 @@ const uint16_t MinorScale::diatonicSeventhOptions[] = {
     Chord::MajorSeventh,
     Chord::Seventh};
 
-
-
-Chord MinorScale::degreeToChord(uint8_t key, uint8_t degree, uint8_t offset, Chord base) {
-    base.root = key + pitch[degree];
-    base.root += offset;
-
-    //0から12の範囲内に収める
-    while(base.root < 0)  base.root += 12;
-    while(base.root >= 12)  base.root -= 12;
-
-    return base;
-}
-
-Chord MinorScale::getDiatonic(uint8_t key, uint8_t degree, bool seventh) {
-    return degreeToChord(key,degree,0,
-        Chord(0,seventh?diatonicSeventhOptions[degree]:diatonicOptions[degree]));
+Chord MinorScale::getDiatonic(uint8_t key, uint8_t number, bool seventh, Chord base) {
+    return degreeToChord(key,DegreeChord(pitch[number], base.option | seventh?diatonicSeventhOptions[number]:diatonicOptions[number]));
 }

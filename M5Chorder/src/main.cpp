@@ -1,33 +1,49 @@
 #include <M5Stack.h>
-#include <M5TreeView.h>
 #include <vector>
-#include <MenuItemToggle.h>
-#include <MenuItemNumeric.h>
 #include <Preferences.h>
 #include "M5StackUpdater.h"
-#include "MenuItemKey.h"
-#include "MenuItemScale.h"
 #include "BLEMidi.h"
 #include "Chord.h"
 #include "Scale.h"
 #include "Keypad.h"
+#include "Menu.h"
+#include "KeyMap/KeyMap.h"
+#include "Context.h"
 
 #define DEVICE_NAME "BLEChorder"
 
 std::vector<uint8_t> playingNotes;
-Scale scale = Scale(0);
-bool seventh = true;
-uint8_t centerNoteNo = 64;
+bool seventh = false;
+int option = 0;
 
-M5TreeView tv;
-typedef std::vector<MenuItem*> vmi;
+// Initialize at setup()
+Scale *scale;
+int *centerNoteNo;
+Context context;
+
 M5ButtonDrawer buttonDrawer;
 
-//画面
+typedef std::vector<SettingItem*> si;
+typedef std::vector<const char *> strs;
+Settings settings(si{
+  new SettingItemEnum("Mode",{"CapsuleChord","CAmDion","Presets"},0),
+  new SettingItemScale("Scale",Scale(0)),
+  new SettingItemEnum("Bass",{"None","C1","C2"},0),
+  new SettingItemEnum("Voicing",{"Open","Closed"},0),
+  new SettingItemNumeric("CenterNoteNo",24,81,60),
+  new SettingItemDegreeChord("Custom 1", DegreeChord(4,Chord::Minor|Chord::MajorSeventh)),
+  new SettingItemDegreeChord("Custom 2", DegreeChord(5,Chord::Minor|Chord::Seventh)),
+  new SettingItem("Keymap",si{
+    new SettingItemEnum("Fuction 1",{"Gyro","Sustain","Note","CC"},0),
+    new SettingItemEnum("Fuction 2",{"Gyro","Sustain","Note","CC"},1)
+  }),
+  new SettingItemEnum("SustainBehavior",{"Normal","Trigger"},0)
+});
+
 enum Scene : uint8_t {
   Connection,
   Play,
-  Menu,
+  FunctionMenu,
   length
 };
 
@@ -50,6 +66,7 @@ void _changeScene_raw() {
   //開始処理
   switch(requiredToChangeScene) {
     case Scene::Connection:
+      M5.Lcd.setTextFont(1);
       M5.Lcd.setCursor(0, 48);
       M5.Lcd.setTextSize(4);
       M5.Lcd.println("CapsuleChord");
@@ -62,12 +79,12 @@ void _changeScene_raw() {
     case Scene::Play:
       M5.Lcd.setCursor(0,0);
       M5.Lcd.setTextSize(2);
-      M5.Lcd.println(scale.toString());
+      M5.Lcd.println(scale->toString());
       buttonDrawer.setText(String("Fn"),String("I"),String("Menu"));//TODO:Change it to "Fn, ,Menu"
       buttonDrawer.draw(true);
     break;
-    case Scene::Menu:
-      tv.begin();
+    case Scene::FunctionMenu:
+      Menu.update(true);
     break;
   }
   currentScene = requiredToChangeScene;
@@ -89,7 +106,7 @@ void sendNotes(bool isNoteOn, std::vector<uint8_t> notes, int vel) {
 }
 
 void playChord(Chord chord) {
-  sendNotes(true,chord.toMidiNoteNumbers(centerNoteNo,16),120);
+  sendNotes(true,chord.toMidiNoteNumbers(*centerNoteNo,16),120);
   M5.Lcd.setTextSize(4);
   M5.Lcd.fillRect(0,60,320,120,BLACK);
   M5.Lcd.setTextDatum(CC_DATUM);
@@ -110,33 +127,9 @@ class ServerCallbacks: public BLEMidiServerCallbacks {
     }
 };
 
-void callBackKey(MenuItem* sender) {
-  MenuItemKey* mi((MenuItemKey*)sender);
-  scale.key = mi->value;
-}
-
-void callBackScale(MenuItem* sender) {
-  MenuItemKey* mi((MenuItemKey*)sender);
-  scale.currentScale = Scale::getAvailableScales()[mi->value].get();
-}
-
-void callBackSeventh(MenuItem* sender) {
-  MenuItemToggle* mi((MenuItemToggle*)sender);
-  seventh = mi->value;
-}
-
-void callBackCenterNoteNo(MenuItem* sender) {
-  MenuItemNumeric* mi((MenuItemNumeric*)sender);
-  centerNoteNo = mi->value;
-}
-
 void setup() {
   M5.begin();
-  Keypad.begin();
   Serial.begin(9600);
-  // Decline speaker noise
-  M5.Speaker.begin();
-  M5.Speaker.mute();
 
   //SD Updater
   if(digitalRead(BUTTON_A_PIN) == 0) {
@@ -145,26 +138,36 @@ void setup() {
     ESP.restart();
   }
 
+  Keypad.begin();
+  // Decline speaker noise
+  M5.Speaker.begin();
+  M5.Speaker.mute();
+
+  // Load settings
+  if(!settings.load()){
+    Serial.println("settings.json is not found in SD, so I'll try to create it.");
+    if(!settings.save()) Serial.println("Setting file creation failed.");
+  }
+
+  // Get setting items
+  scale = &((SettingItemScale*)settings.findSettingByKey(String("Scale")))->content;
+  centerNoteNo = &((SettingItemNumeric*)settings.findSettingByKey(String("CenterNoteNo")))->number;
+
+  // Make Context
+  context = Context(&settings);
+  context.playChord = playChord;
+  context.sendNotes = sendNotes;
+  Context::setContext(&context);
+
+  //Menu initialization
+  M5ButtonDrawer::width = 106;
+  Menu.begin(&settings);
+
+  // Scene initialization
   changeScene(Scene::Connection);
   _changeScene_raw();
 
   Midi.begin(DEVICE_NAME, new ServerCallbacks(), NULL);
-
-  //MenuMenu
-  M5ButtonDrawer::width = 106;
-  tv.clientRect.x = 60;
-  tv.clientRect.y = 16;
-  tv.clientRect.w = 240;
-  tv.clientRect.h = 200;
-  tv.itemWidth = 192;
-  tv.itemHeight = 24;
-  tv.setTextFont(2);
-  tv.setItems(vmi{
-    new MenuItemKey("Key", scale.key, callBackKey),
-    new MenuItemScale("Scale", 0, callBackScale),
-    new MenuItemToggle("Seventh",seventh,callBackSeventh),
-    new MenuItemNumeric("CenterNoteNo",24,81,centerNoteNo,callBackCenterNoteNo)
-  });  
 }
 
 void loop() {
@@ -177,32 +180,36 @@ void loop() {
       M5.update();
       if(M5.BtnC.pressedFor(100)) { //Go to Menu Scene
         sendNotes(false,std::vector<uint8_t>(),120);
-        changeScene(Scene::Menu);
+        changeScene(Scene::FunctionMenu);
         break;
       }
-      if(M5.BtnA.wasPressed())  playChord(scale.getDiatonic(2,seventh)); //For testing TODO:delete it
-      if(M5.BtnA.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
+      
+      // if(M5.BtnB.wasPressed()) {
+      //   Chord c = scale->getDiatonic(0,Keypad[Key_Seventh].isPressed());
+      //   if(Keypad[Key_ThirdInvert].isPressed())   thirdInvert(&c);
+      //   if(Keypad[Key_FlatFive].isPressed())     fifthFlat(&c);
+      //   if(Keypad[Key_Augment].isPressed())       augment(&c);
+      //   if(Keypad[Key_Sus4].isPressed())          sus4(&c);
+      //   // if(Keypad[Key_Seventh].isPressed()) thirdInvert(&c);
+      //   if(Keypad[Key_SeventhInvert].isPressed()) seventhInvert(&c);
+      //   if(Keypad[Key_Ninth].isPressed())         ninth(&c);
+      //   if(Keypad[Key_Thirteenth].isPressed())    thirteenth(&c);
+      //   playChord(c);
+      // }
+      if(M5.BtnB.wasReleased()) sendNotes(false,std::vector<uint8_t>(),120);
+
       Keypad.update();
-      while(Keypad.hasEvent()){
-        char event = Keypad.getEvent();
-        switch(event >> 7 & 0b1) {
-          case Key_State_Pressed:
-            if((event & 0b1110000) == 0) {
-              uint8_t number = (event & 0b1111) - 1;
-              if(0 <= number && number <= 6) playChord(scale.getDiatonic(number,seventh));
-            }
-          break;
-          case Key_State_Released:
-            if((event & 0b1110000) == 0) sendNotes(false,std::vector<uint8_t>(),120);
-          break;
-        }
-      }
+      KeyMap::getAvailableKeyMaps()[0].get()->update();
+      
       buttonDrawer.draw();
     break;
-    case Scene::Menu:
-      tv.update();//Contains M5.update(); (probably...)
-      // Press A at root to back to play scene
-      if(M5.BtnA.wasPressed() && (M5TreeView::getFocusItem()->parentItem() == &tv)) changeScene(Scene::Play);
+    case Scene::FunctionMenu:
+      Menu.update();//Contains M5.update()
+      // When requried, back to play scene
+      if(Menu.isExitRequired()) {
+        Menu.save();
+        changeScene(Scene::Play);
+      }
     break;
   }
   if(currentScene != requiredToChangeScene) _changeScene_raw();

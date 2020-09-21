@@ -16,7 +16,7 @@ public:
     BLEAdvertising *advertising;
     BLECharacteristic *characteristic;
 
-    std::string deviceName = "BLEMidi";
+    std::string deviceName = "CapsuleChord";
     std::string midiServiceUUID = MIDI_SERVICE_UUID;
     std::string midiCharacteristicUUID = MIDI_CHARACTERISTIC_UUID;
 
