@@ -1,5 +1,6 @@
 #include "CapsuleChordKeyMap.h"
 #include "Modifier.h"
+#include "BLEMidi.h"
 
 const uint8_t CapsuleChordKeyMap::numberKeyMap[] = {
     0, //Custom1
@@ -18,7 +19,7 @@ void CapsuleChordKeyMap::update() {
     switch(event >> 7 & 0b1) {
       case Key_State_Pressed:
         switch(event >> 4 & 0b111) {
-          case 0: {// Numbers Pressed
+          case 0: {// Number Keys Pressed
             uint8_t number = numberKeyMap[(event & 0b1111) - 1]; // Key number starts from 1
             if(0 <= number && number <= 6) {
               Chord c = context->scale->getDiatonic(number,Keypad[Key_Seventh].isPressed());
@@ -35,10 +36,24 @@ void CapsuleChordKeyMap::update() {
               context->playChord(c);
             }
           } break;
+          case 3: {// Function Keys Pressed
+            if((event & 0b1111) == 2) {// Sustain Key
+              Midi.sendNote(0x91,60,100);
+            }
+          } break;
         }
       break;
       case Key_State_Released:
-        if((event & 0b1110000) == 0) context->sendNotes(false,std::vector<uint8_t>(),120);
+        switch(event >> 4 & 0b111) {
+          case 0: {
+            context->sendNotes(false,std::vector<uint8_t>(),120);
+          } break;
+          case 3: {
+            if((event & 0b1111) == 2) {// Sustain Key
+              Midi.sendNote(0x81,60,100);
+            }
+          }
+        }
       break;
     }
   }
