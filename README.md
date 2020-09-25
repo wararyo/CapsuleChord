@@ -6,7 +6,7 @@ An electronic instrument for playing chords, using the M5Stack
 The firmware in M5Stack is based on [M5Stack_BLEChorder](https://github.com/wararyo/m5chorder).
 BLEChorder can be played alone on the M5Stack.
 
-[🎥Walkthrough Video](https://youtu.be/JE3piJ5rN3A)
+[🎥Introduction Video](https://youtu.be/JE3piJ5rN3A)
 
 **Currently this project is in progress!**  
 The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23CapsuleChord&f=live) (Japanese)
