@@ -4,6 +4,9 @@ An electronic instrument for playing chords, using the M5Stack
 ![eyecatch](images/eyecatch.jpg)
 
 The firmware in M5Stack is based on [M5Stack_BLEChorder](https://github.com/wararyo/m5chorder).
+BLEChorder can be played alone on the M5Stack.
+
+[🎥Walkthrough Video](https://youtu.be/JE3piJ5rN3A)
 
 **Currently this project is in progress!**  
 The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23CapsuleChord&f=live) (Japanese)
@@ -11,8 +14,8 @@ The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23Capsul
 ## Features
 
 * Easy to play chords
-* Specify a diatonic code with the left keypad and modifies it with the right keypad
-* Can be connected with iOS/Windows/macOS via BLE
+* Specify a diatonic code with the left keypad and modify it with the right keypad
+* Can be connected with iOS/iPadOS/macOS/Windows via BLE (On Windows, requires MIDIberry and loopMIDI)
 
 ## Structure
 
