@@ -8,8 +8,11 @@ BLEChorder can be played alone on the M5Stack.
 
 [🎥Introduction Video](https://youtu.be/JE3piJ5rN3A)
 
-**Currently this project is in progress!**  
+Currently this project is in progress.  
 The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23CapsuleChord&f=live) (Japanese)
+
+**2020/09/26 3D model files are now available!**  
+See `Case` directory.
 
 ## Features
 
@@ -48,3 +51,10 @@ The latest information -> [#CapsuleChord](https://twitter.com/search?q=%23Capsul
 * Two 3M tapping scress (to mount the M5Stack)
 * AVRISP of some kind
 * and a 3D printing environment :)
+
+## Credits
+
+# Credits
+
+* [M5TreeView](https://github.com/lovyan03/M5Stack_TreeView) by [lovyan03](https://github.com/lovyan03)
+* [M5Stack 3DModel](https://botalab.tech/m5stack_cad_data/) by [botamochi6277](https://botalab.tech/)
