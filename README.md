@@ -54,7 +54,5 @@ See `Case` directory.
 
 ## Credits
 
-# Credits
-
 * [M5TreeView](https://github.com/lovyan03/M5Stack_TreeView) by [lovyan03](https://github.com/lovyan03)
 * [M5Stack 3DModel](https://botalab.tech/m5stack_cad_data/) by [botamochi6277](https://botalab.tech/)
